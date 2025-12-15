@@ -41,9 +41,11 @@ export function CollaborationDemo() {
     const [currentCharIndex, setCurrentCharIndex] = useState(0);
     const [activeUsers, setActiveUsers] = useState<number[]>([0]);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
-    // Detectar tema do sistema
+    // Detectar tema do sistema apenas no cliente
     useEffect(() => {
+        setIsMounted(true);
         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
         setIsDarkMode(mediaQuery.matches);
 

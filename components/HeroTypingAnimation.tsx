@@ -43,9 +43,18 @@ export function HeroTypingAnimation() {
     const [phraseIndex, setPhraseIndex] = useState(0);
     const [phase, setPhase] = useState<ActionPhase>("typing");
     const [showCursor, setShowCursor] = useState(true);
-    const [activeCollaboratorIndex, setActiveCollaboratorIndex] = useState(() => getRandomCollaborator());
-    const lastTypingCollaborator = useRef<number>(activeCollaboratorIndex);
+    const [activeCollaboratorIndex, setActiveCollaboratorIndex] = useState(0);
+    const lastTypingCollaborator = useRef<number>(0);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Inicializar com valor aleatório apenas no cliente
+    useEffect(() => {
+        const randomIndex = getRandomCollaborator();
+        setActiveCollaboratorIndex(randomIndex);
+        lastTypingCollaborator.current = randomIndex;
+        setIsMounted(true);
+    }, []);
 
     // Detectar tema do sistema
     useEffect(() => {

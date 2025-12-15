@@ -25,8 +25,14 @@ export function LiveStatsIndicator() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [displayValue, setDisplayValue] = useState(liveStats[0].value);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
     const currentStat = liveStats[currentIndex];
+
+    // Marcar como montado no cliente
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Vary the number slightly every few seconds
     useEffect(() => {
