@@ -52,15 +52,27 @@
   font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro",
     monospace;
   line-height: 1.6;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: none;
+  border-radius: 0;
   background: #fff;
+}
+
+/* Desktop: adiciona borda e cantos arredondados */
+@media (min-width: 768px) {
+  .codemirror-editor-container .CodeMirror {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+
+  .codemirror-editor-container .CodeMirror-gutters {
+    border-radius: 8px 0 0 8px;
+  }
 }
 
 .codemirror-editor-container .CodeMirror-gutters {
   background: #f8fafc;
   border-right: 1px solid #e2e8f0;
-  border-radius: 8px 0 0 8px;
+  border-radius: 0;
 }
 
 .codemirror-editor-container .CodeMirror-linenumber {
