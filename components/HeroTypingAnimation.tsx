@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface Collaborator {
     name: string;
-    color: string;
+    lightColor: string;
+    darkColor: string;
 }
 
+// Professional colors with light/dark variants for proper contrast
 const collaborators: Collaborator[] = [
-    { name: "Ana", color: "#3b82f6" },
-    { name: "Carlos", color: "#10b981" },
-    { name: "Maria", color: "#f59e0b" },
-    { name: "João", color: "#ef4444" },
-    { name: "Luiza", color: "#8b5cf6" },
-
+    { name: "Ana", lightColor: "#2563eb", darkColor: "#60a5fa" },      // Blue
+    { name: "Carlos", lightColor: "#059669", darkColor: "#34d399" },   // Emerald
+    { name: "Maria", lightColor: "#ea580c", darkColor: "#fb923c" },    // Orange
+    { name: "João", lightColor: "#7c3aed", darkColor: "#a78bfa" },     // Violet
+    { name: "Luiza", lightColor: "#db2777", darkColor: "#f472b6" },    // Pink
 ];
 
 const phrases = [
@@ -44,9 +45,26 @@ export function HeroTypingAnimation() {
     const [showCursor, setShowCursor] = useState(true);
     const [activeCollaboratorIndex, setActiveCollaboratorIndex] = useState(() => getRandomCollaborator());
     const lastTypingCollaborator = useRef<number>(activeCollaboratorIndex);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    // Detectar tema do sistema
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        setIsDarkMode(mediaQuery.matches);
+
+        const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+        mediaQuery.addEventListener("change", handler);
+        return () => mediaQuery.removeEventListener("change", handler);
+    }, []);
+
+    // Helper para obter cor correta baseada no tema
+    const getColor = useCallback((collaborator: Collaborator) => {
+        return isDarkMode ? collaborator.darkColor : collaborator.lightColor;
+    }, [isDarkMode]);
 
     const currentPhrase = phrases[phraseIndex];
     const activeCollaborator = collaborators[activeCollaboratorIndex];
+    const activeColor = getColor(activeCollaborator);
 
     // Cursor blink
     useEffect(() => {
@@ -123,14 +141,14 @@ export function HeroTypingAnimation() {
             <span className="absolute -left-8 top-[0.55em] -translate-y-1/2 flex items-center gap-1.5 transition-all duration-300">
                 <span
                     className="w-2.5 h-2.5 rounded-full animate-pulse"
-                    style={{ backgroundColor: activeCollaborator.color }}
+                    style={{ backgroundColor: activeColor }}
                 />
             </span>
 
             {/* Text being typed - with invisible placeholder to maintain width */}
             <span
                 className="transition-colors duration-200"
-                style={{ color: activeCollaborator.color }}
+                style={{ color: activeColor }}
             >
                 {displayText || "\u200B"}
             </span>
@@ -141,7 +159,7 @@ export function HeroTypingAnimation() {
                 <span
                     className="inline-block w-[3px] h-[0.85em] ml-0.5 rounded-full transition-all duration-150 self-center"
                     style={{
-                        backgroundColor: activeCollaborator.color,
+                        backgroundColor: activeColor,
                         opacity: showCursor ? 1 : 0,
                     }}
                 />
@@ -149,7 +167,7 @@ export function HeroTypingAnimation() {
                 {/* Floating collaborator name badge - follows cursor */}
                 <span
                     className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-xs font-medium text-white whitespace-nowrap transition-all duration-200 shadow-sm backdrop-blur-sm"
-                    style={{ backgroundColor: `${activeCollaborator.color}cc` }}
+                    style={{ backgroundColor: `${activeColor}cc` }}
                     key={activeCollaboratorIndex}
                 >
                     {activeCollaborator.name}
@@ -159,7 +177,7 @@ export function HeroTypingAnimation() {
                     {/* Small arrow pointing down */}
                     <span
                         className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent"
-                        style={{ borderTopColor: `${activeCollaborator.color}cc` }}
+                        style={{ borderTopColor: `${activeColor}cc` }}
                     />
                 </span>
             </span>

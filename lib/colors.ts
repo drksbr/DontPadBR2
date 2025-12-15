@@ -1,15 +1,56 @@
-const COLORS = [
-  "#FF5C5C",
-  "#FFB65C",
-  "#88FF70",
-  "#47F0FF",
-  "#478EFF",
-  "#745CFF",
-  "#FF85FF",
+// Professional color palette for collaborators
+// Each color has light and dark variants for proper contrast
+const COLLABORATOR_COLORS = [
+  { light: "#2563eb", dark: "#60a5fa" }, // Blue
+  { light: "#059669", dark: "#34d399" }, // Emerald
+  { light: "#7c3aed", dark: "#a78bfa" }, // Violet
+  { light: "#db2777", dark: "#f472b6" }, // Pink
+  { light: "#ea580c", dark: "#fb923c" }, // Orange
+  { light: "#0891b2", dark: "#22d3ee" }, // Cyan
+  { light: "#4f46e5", dark: "#818cf8" }, // Indigo
+  { light: "#be123c", dark: "#fb7185" }, // Rose
+  { light: "#0d9488", dark: "#2dd4bf" }, // Teal
+  { light: "#9333ea", dark: "#c084fc" }, // Purple
 ];
+
+// Legacy colors for backward compatibility
+const COLORS = COLLABORATOR_COLORS.map((c) => c.light);
 
 export function randomColor() {
   return COLORS[Math.floor(Math.random() * COLORS.length)];
+}
+
+/**
+ * Gets a random collaborator color appropriate for the current theme
+ * @param isDarkMode - Whether the app is in dark mode
+ * @returns A hex color string
+ */
+export function getCollaboratorColor(isDarkMode: boolean = false): string {
+  const colorPair =
+    COLLABORATOR_COLORS[Math.floor(Math.random() * COLLABORATOR_COLORS.length)];
+  return isDarkMode ? colorPair.dark : colorPair.light;
+}
+
+/**
+ * Gets a deterministic collaborator color based on a seed (like user ID)
+ * @param seed - A string to use as seed for consistent color assignment
+ * @param isDarkMode - Whether the app is in dark mode
+ * @returns A hex color string
+ */
+export function getCollaboratorColorFromSeed(
+  seed: string,
+  isDarkMode: boolean = false
+): string {
+  // Simple hash function for deterministic color selection
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  const index = Math.abs(hash) % COLLABORATOR_COLORS.length;
+  const colorPair = COLLABORATOR_COLORS[index];
+  return isDarkMode ? colorPair.dark : colorPair.light;
 }
 
 /**

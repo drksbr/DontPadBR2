@@ -3,13 +3,30 @@
 import Image from "next/image";
 import { usePresence, usePresenceSetter } from "@y-sweet/react";
 import { useEffect, useState } from "react";
-import { randomColor } from "@/lib/colors";
+import { getCollaboratorColor } from "@/lib/colors";
 
 export function Presence() {
   const setPresence = usePresenceSetter();
   const presence = usePresence();
 
-  const [self, setSelf] = useState(() => ({ color: randomColor() }));
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [self, setSelf] = useState(() => ({ color: getCollaboratorColor(false) }));
+
+  // Detectar tema do sistema
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const isDark = mediaQuery.matches;
+    setIsDarkMode(isDark);
+    // Atualizar cor ao montar com o tema correto
+    setSelf((prev) => ({ ...prev, color: getCollaboratorColor(isDark) }));
+
+    const handler = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
   useEffect(() => setPresence(self), [setPresence, self]);
 
   const others = Array.from(presence.entries());

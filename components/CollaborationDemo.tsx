@@ -4,15 +4,15 @@ import { useState, useEffect, useCallback } from "react";
 
 interface User {
     name: string;
-    color: string;
-    colorClass: string;
-    bgClass: string;
+    lightColor: string;
+    darkColor: string;
 }
 
+// Professional colors with light/dark variants for proper contrast
 const users: User[] = [
-    { name: "Ana", color: "#3b82f6", colorClass: "text-blue-500", bgClass: "bg-blue-500" },
-    { name: "Carlos", color: "#10b981", colorClass: "text-emerald-500", bgClass: "bg-emerald-500" },
-    { name: "Maria", color: "#f59e0b", colorClass: "text-amber-500", bgClass: "bg-amber-500" },
+    { name: "Ana", lightColor: "#2563eb", darkColor: "#60a5fa" },     // Blue
+    { name: "Carlos", lightColor: "#059669", darkColor: "#34d399" },  // Emerald
+    { name: "Maria", lightColor: "#ea580c", darkColor: "#fb923c" },   // Orange
 ];
 
 interface TypedLine {
@@ -40,6 +40,22 @@ export function CollaborationDemo() {
     const [currentLineIndex, setCurrentLineIndex] = useState(0);
     const [currentCharIndex, setCurrentCharIndex] = useState(0);
     const [activeUsers, setActiveUsers] = useState<number[]>([0]);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    // Detectar tema do sistema
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        setIsDarkMode(mediaQuery.matches);
+
+        const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+        mediaQuery.addEventListener("change", handler);
+        return () => mediaQuery.removeEventListener("change", handler);
+    }, []);
+
+    // Helper para obter cor correta baseada no tema
+    const getUserColor = useCallback((user: User) => {
+        return isDarkMode ? user.darkColor : user.lightColor;
+    }, [isDarkMode]);
 
     const resetAnimation = useCallback(() => {
         setLines([]);
@@ -124,7 +140,7 @@ export function CollaborationDemo() {
                             >
                                 <div
                                     className="w-2 h-2 rounded-full"
-                                    style={{ backgroundColor: users[userIndex].color }}
+                                    style={{ backgroundColor: getUserColor(users[userIndex]) }}
                                 ></div>
                                 <span className="text-xs text-slate-600 dark:text-slate-300">{users[userIndex].name}</span>
                             </div>
@@ -146,7 +162,7 @@ export function CollaborationDemo() {
                                 {!line.completed && index === lines.length - 1 && (
                                     <span
                                         className="w-0.5 h-4 ml-0.5 animate-typing-cursor rounded-full"
-                                        style={{ backgroundColor: line.user.color }}
+                                        style={{ backgroundColor: getUserColor(line.user) }}
                                     ></span>
                                 )}
                             </div>

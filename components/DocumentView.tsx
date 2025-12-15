@@ -13,7 +13,7 @@ import { CodeMirrorEditor } from "./CodeMirrorEditor";
 import Link from "next/link";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
-import { generateSubdocumentFragmentKey } from "@/lib/colors";
+import { generateSubdocumentFragmentKey, getCollaboratorColor } from "@/lib/colors";
 import { syncXmlFragmentToText } from "@/lib/editorSync";
 import { EditorSwitchModal, EditorSwitchIcon } from "./EditorSwitchModal";
 
@@ -32,13 +32,19 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     const [showSwitchModal, setShowSwitchModal] = useState(false);
     const previousEditorType = useRef<"blocknote" | "codemirror">("codemirror");
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [collaboratorColor, setCollaboratorColor] = useState(() => getCollaboratorColor(false));
 
     // Detectar tema do sistema
     useEffect(() => {
         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-        setIsDarkMode(mediaQuery.matches);
+        const isDark = mediaQuery.matches;
+        setIsDarkMode(isDark);
+        setCollaboratorColor(getCollaboratorColor(isDark));
 
-        const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+        const handler = (e: MediaQueryListEvent) => {
+            setIsDarkMode(e.matches);
+            // Manter a mesma cor, apenas ajustar para o tema
+        };
         mediaQuery.addEventListener("change", handler);
         return () => mediaQuery.removeEventListener("change", handler);
     }, []);
@@ -65,7 +71,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
         collaboration: {
             provider,
             fragment: doc.getXmlFragment(fragmentKey),
-            user: { name: "Colaborador", color: "#1f2937" },
+            user: { name: "Colaborador", color: collaboratorColor },
         },
     });
 
@@ -229,7 +235,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
                         {editorType === "blocknote" ? (
                             <BlockNoteView editor={editor} theme={isDarkMode ? "dark" : "light"} />
                         ) : (
-                            <CodeMirrorEditor doc={doc} fragmentKey={textKey} provider={provider} user={{ name: "Colaborador", color: "#1f2937" }} />
+                            <CodeMirrorEditor doc={doc} fragmentKey={textKey} provider={provider} user={{ name: "Colaborador", color: collaboratorColor }} />
                         )}
                     </div>
                 </div>
