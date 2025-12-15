@@ -26,6 +26,67 @@
   }
 }
 
+/* Reset styles for BlockNote editor elements - must come before global styles */
+.bn-editor a,
+.bn-editor a:hover,
+.bn-container a,
+.bn-container a:hover,
+.bn-block-content a,
+.bn-block-content a:hover,
+[class*="bn-"] a,
+[class*="bn-"] a:hover {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.bn-editor a::after,
+.bn-container a::after,
+.bn-block-content a::after,
+[class*="bn-"] a::after,
+.bn-editor a[target="_blank"]::after,
+.bn-container a[target="_blank"]::after,
+.bn-block-content a[target="_blank"]::after,
+[class*="bn-"] a[target="_blank"]::after {
+  content: none !important;
+  display: none !important;
+}
+
+.bn-editor code,
+.bn-container code,
+.bn-block-content code,
+[class*="bn-"] code {
+  all: unset !important;
+  font-family: inherit;
+}
+
+/* Fix BlockNote checkbox styling */
+.bn-block-content[data-content-type="checkListItem"] > input,
+.bn-block-content input[type="checkbox"] {
+  all: unset !important;
+  cursor: pointer !important;
+  width: 13px !important;
+  height: 13px !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 4px !important;
+  margin-right: 8px !important;
+  margin-top: 4px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-color: white !important;
+  flex-shrink: 0 !important;
+}
+
+.bn-block-content[data-content-type="checkListItem"] > input:checked,
+.bn-block-content input[type="checkbox"]:checked {
+  background-color: #1f2937 !important;
+  border-color: #1f2937 !important;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="8" fill="none"><path stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m1 4 2.5 2.5L9 1"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
 a {
   @apply text-slate-900 hover:text-slate-700 transition underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900;
 }
@@ -113,4 +174,167 @@ input[type="checkbox"]:checked {
 
 .glass-dark {
   @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50;
+}
+
+/* Homepage Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes typing-cursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes counter-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out forwards;
+}
+
+.animate-typing-cursor {
+  animation: typing-cursor 1s infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+/* Collaboration Demo Styles */
+.collab-demo {
+  @apply relative overflow-hidden rounded-xl border border-slate-200 bg-white;
+}
+
+.collab-line {
+  @apply font-mono text-sm leading-relaxed;
+}
+
+.cursor-user-1 {
+  @apply inline-block w-0.5 h-5 bg-blue-500 rounded-full;
+}
+
+.cursor-user-2 {
+  @apply inline-block w-0.5 h-5 bg-emerald-500 rounded-full;
+}
+
+.cursor-user-3 {
+  @apply inline-block w-0.5 h-5 bg-amber-500 rounded-full;
+}
+
+.presence-dot {
+  @apply w-2 h-2 rounded-full;
+}
+
+/* Counter Animation */
+.counter-value {
+  font-variant-numeric: tabular-nums;
 }
