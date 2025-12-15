@@ -1,20 +1,20 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* bun.lock* ./
-RUN npm install
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build the Next.js application
-RUN npm run build
+RUN bun run build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM oven/bun:1-alpine AS runner
 
 WORKDIR /app
 
@@ -29,8 +29,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Create data directory for y-sweet persistence
-RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
+# Create data directory for persistence
+RUN mkdir -p /app/.data && chown -R nextjs:nodejs /app/.data
 
 USER nextjs
 
@@ -39,4 +39,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Bun executa o server.js do Next.js standalone
+CMD ["bun", "run", "server.js"]

@@ -22,5 +22,5 @@ EXPOSE 8080
 VOLUME ["/data"]
 
 # URL_PREFIX deve ser definido como variável de ambiente para produção
-# Exemplo: wss://seu-dominio.com.br/y-sweet
-CMD ["sh", "-c", "y-sweet serve /data --host 0.0.0.0 --port 8080 ${URL_PREFIX:+--url-prefix $URL_PREFIX}"]
+# Exemplo: wss://api.seu-dominio.com.br
+CMD sh -c 'if [ -n "$URL_PREFIX" ]; then exec y-sweet serve /data --host 0.0.0.0 --port 8080 --url-prefix "$URL_PREFIX"; else exec y-sweet serve /data --host 0.0.0.0 --port 8080; fi'
