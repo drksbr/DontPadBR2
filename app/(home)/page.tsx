@@ -59,7 +59,7 @@ export default function HomePage() {
 
             {/* Hero Section */}
             <main className="flex-1">
-                <section className="flex flex-col items-center justify-center px-6 py-24 bg-gradient-to-b from-slate-50 dark:from-slate-950 to-white dark:to-slate-900">
+                <section className="flex flex-col items-center justify-center px-6 py-28 bg-gradient-to-b from-slate-50 dark:from-slate-950 to-white dark:to-slate-900">
                     <div className="text-center mb-12 max-w-3xl animate-fade-in-up">
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-6 tracking-tight leading-tight">
                             Colaboração em texto,<br />
@@ -100,30 +100,6 @@ export default function HomePage() {
                         </p>
                     </div>
 
-                    {/* Quick Links */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl animate-fade-in-up animation-delay-400">
-                        <ExampleCard
-                            title="Reuniões"
-                            description="Pautas e atas de reunião em tempo real."
-                            docName="reuniao-sprint"
-                            icon="📅"
-                            delay={0}
-                        />
-                        <ExampleCard
-                            title="Código"
-                            description="Compartilhe snippets sem formatação."
-                            docName="snippet-codigo"
-                            icon="💻"
-                            delay={100}
-                        />
-                        <ExampleCard
-                            title="Notas"
-                            description="Lista de tarefas e anotações rápidas."
-                            docName="minhas-notas"
-                            icon="📝"
-                            delay={200}
-                        />
-                    </div>
                 </section>
 
                 {/* Collaboration Demo Section */}
