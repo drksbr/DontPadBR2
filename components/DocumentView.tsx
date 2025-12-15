@@ -16,6 +16,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { generateSubdocumentFragmentKey, getCollaboratorColor } from "@/lib/colors";
 import { syncXmlFragmentToText } from "@/lib/editorSync";
 import { EditorSwitchModal, EditorSwitchIcon } from "./EditorSwitchModal";
+import { SyncStatus } from "./SyncStatus";
+import { useSyncStatus } from "@/lib/useSyncStatus";
 
 interface DocumentViewProps {
     documentId: string;
@@ -31,6 +33,8 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     const [hideToast, setHideToast] = useState(false);
     const [showSwitchModal, setShowSwitchModal] = useState(false);
     const previousEditorType = useRef<"blocknote" | "codemirror">("codemirror");
+    const hasInitialized = useRef(false);
+    const isSettingMeta = useRef(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [collaboratorColor, setCollaboratorColor] = useState(() => getCollaboratorColor(false));
 
@@ -57,14 +61,70 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     // Key para o Y.Text do CodeMirror (baseado no mesmo fragmentKey)
     const textKey = `${fragmentKey}-text`;
 
-    // Load editor preference from localStorage (apenas no mount)
+    // Load editor preference from Y.Doc metadata with localStorage fallback
     useEffect(() => {
-        const saved = localStorage.getItem("editor-preference") as "blocknote" | "codemirror" | null;
-        if (saved) {
-            setEditorType(saved);
-            previousEditorType.current = saved;
+        try {
+            const meta = doc.getMap("metadata");
+            const key = `editorType:${fragmentKey}`;
+            const savedMeta = meta.get(key) as "blocknote" | "codemirror" | undefined | null;
+            if (savedMeta) {
+                setEditorType(savedMeta);
+                previousEditorType.current = savedMeta;
+            } else {
+                const saved = localStorage.getItem("editor-preference") as "blocknote" | "codemirror" | null;
+                if (saved) {
+                    console.debug("init: setting editorType from localStorage", { saved });
+                    setEditorType(saved);
+                    previousEditorType.current = saved;
+                    isSettingMeta.current = true;
+                    try {
+                        meta.set(key, saved);
+                    } finally {
+                        // small delay to avoid immediate observer reaction
+                        setTimeout(() => (isSettingMeta.current = false), 200);
+                    }
+                }
+            }
+
+            // mark as initialized to avoid running sync conversions on initial mount
+            // Use a microtask to avoid race conditions where the swap effect
+            // could run before we finish setting `previousEditorType`.
+            setTimeout(() => {
+                hasInitialized.current = true;
+                console.debug("initialization complete", { editorType, previous: previousEditorType.current });
+            }, 0);
+
+            const observer = (events: any) => {
+                try {
+                    if (isSettingMeta.current) return;
+                    const val = meta.get(key) as "blocknote" | "codemirror" | undefined | null;
+                    console.debug("metadata.observer fired", { key, val, previous: previousEditorType.current });
+                    if (val && val !== previousEditorType.current) {
+                        console.debug("metadata.observer updating editorType", { from: previousEditorType.current, to: val });
+                        setEditorType(val);
+                        previousEditorType.current = val;
+                    }
+                } catch (e) {
+                    console.debug("metadata.observer:error", e);
+                }
+            };
+
+            // Y.Map doesn't have a standardized observe API on this wrapper, try 'observe'
+            if (typeof (meta as any).observe === "function") {
+                (meta as any).observe(observer);
+                return () => (meta as any).unobserve?.(observer);
+            }
+        } catch (e) {
+            // fallback to localStorage only
+            const saved = localStorage.getItem("editor-preference") as "blocknote" | "codemirror" | null;
+            if (saved) {
+                setEditorType(saved);
+                previousEditorType.current = saved;
+            }
+            // Use microtask to set initialized in fallback too
+            setTimeout(() => (hasInitialized.current = true), 0);
         }
-    }, []);
+    }, [doc, fragmentKey]);
 
     // Criar o editor BlockNote - SEMPRE criar, mas só renderizar quando necessário
     const editor = useCreateBlockNote({
@@ -75,10 +135,25 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
         },
     });
 
+    const { isSynced } = useSyncStatus();
+
     // Sincronizar conteúdo quando trocar de editor
     useEffect(() => {
         const prev = previousEditorType.current;
         const current = editorType;
+        console.debug("editor swap effect", { prev, current, isSynced });
+
+        // Devemos ignorar a primeira vez após mount/initialization
+        if (!hasInitialized.current) {
+            console.debug("editor swap effect: skipping because not initialized yet");
+            return;
+        }
+
+        // Se não estamos sincronizados com o servidor, adie a conversão
+        if (!isSynced) {
+            console.debug("editor swap effect: skipping because provider not synced yet");
+            return;
+        }
 
         // Se mudou de editor, sincronizar
         if (prev !== current) {
@@ -88,6 +163,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
             if (current === "codemirror") {
                 // Saindo do BlockNote, indo para CodeMirror
                 // Sincroniza XmlFragment -> Y.Text
+                console.debug("editor swap: XmlFragment -> Y.Text");
                 syncXmlFragmentToText(xmlFragment, yText, doc);
             } else {
                 // Saindo do CodeMirror, indo para BlockNote
@@ -105,6 +181,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
 
                     // Usa replaceBlocks para substituir todo o conteúdo
                     try {
+                        console.debug("editor swap: Replacing blocks in BlockNote", { blocksCount: blocks.length });
                         editor.replaceBlocks(editor.document, blocks);
                     } catch (e) {
                         console.error("Erro ao substituir blocos:", e);
@@ -114,22 +191,67 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
 
             previousEditorType.current = current;
         }
-    }, [editorType, doc, fragmentKey, textKey, editor]);
+    }, [editorType, doc, fragmentKey, textKey, editor, isSynced]);
 
     // Toggle editor type
     const toggleEditor = useCallback(() => {
+        console.debug("toggleEditor called", { current: editorType });
         setEditorType((prev) => {
             const newType = prev === "blocknote" ? "codemirror" : "blocknote";
+            console.debug("toggleEditor:setEditorType", { prev, newType });
             localStorage.setItem("editor-preference", newType);
+            // Persist per-document (and per-subdocument) preference in Y.Doc metadata
+            try {
+                const meta = doc.getMap("metadata");
+                const key = `editorType:${fragmentKey}`;
+                isSettingMeta.current = true;
+                try {
+                    meta.set(key, newType);
+                } finally {
+                    setTimeout(() => (isSettingMeta.current = false), 200);
+                }
+                console.debug("toggleEditor:meta.set", { key, newType });
+            } catch (e) {
+                console.debug("toggleEditor:meta.set:error", e);
+                isSettingMeta.current = false;
+            }
             showToast(`Editor alterado para ${newType === "blocknote" ? "BlockNote" : "CodeMirror"}`);
             return newType;
         });
-    }, [showToast]);
+    }, [showToast, doc, fragmentKey, editorType]);
 
     // Abrir modal de confirmação de troca
     const handleEditorSwitchRequest = useCallback(() => {
         setShowSwitchModal(true);
     }, []);
+
+    // Handler idempotente: define explicitamente o editor para evitar double-toggle
+    const handleConfirmSwitch = useCallback((newType: "blocknote" | "codemirror") => {
+        // Persist preference
+        localStorage.setItem("editor-preference", newType);
+        try {
+            const meta = doc.getMap("metadata");
+            const key = `editorType:${fragmentKey}`;
+            isSettingMeta.current = true;
+            try {
+                meta.set(key, newType);
+            } finally {
+                // Delay turning off the flag to ensure observer doesn't react
+                setTimeout(() => (isSettingMeta.current = false), 200);
+            }
+            console.debug("handleConfirmSwitch: meta.set", { key, newType });
+        } catch (e) {
+            console.debug("handleConfirmSwitch: meta.set:error", e);
+            isSettingMeta.current = false;
+        }
+
+        // Update local state (idempotent)
+        setEditorType((prev) => {
+            if (prev === newType) return prev;
+            return newType;
+        });
+        showToast(`Editor alterado para ${newType === "blocknote" ? "BlockNote" : "CodeMirror"}`);
+    }, [doc, fragmentKey, showToast]);
 
     const handleCopyLink = async () => {
         try {
@@ -168,7 +290,8 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
                                     </>
                                 )}
                             </div>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">Sincronizado</span>
+                            { /* Sync status + collaborator count */}
+                            <SyncStatus />
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -252,7 +375,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
             <EditorSwitchModal
                 isOpen={showSwitchModal}
                 onClose={() => setShowSwitchModal(false)}
-                onConfirm={toggleEditor}
+                onConfirm={handleConfirmSwitch}
                 currentEditor={editorType}
             />
         </div>

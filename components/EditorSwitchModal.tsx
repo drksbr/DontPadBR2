@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 interface EditorSwitchModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: () => void;
+    onConfirm: (newEditor: "blocknote" | "codemirror") => void;
     currentEditor: "blocknote" | "codemirror";
 }
 
@@ -19,6 +19,7 @@ export function EditorSwitchModal({
     const [shouldRender, setShouldRender] = useState(false);
 
     const targetEditor = currentEditor === "blocknote" ? "CodeMirror" : "BlockNote";
+    const targetKey: "blocknote" | "codemirror" = currentEditor === "blocknote" ? "codemirror" : "blocknote";
 
     useEffect(() => {
         if (isOpen) {
@@ -122,7 +123,7 @@ export function EditorSwitchModal({
                             </button>
                             <button
                                 onClick={() => {
-                                    onConfirm();
+                                    onConfirm(targetKey);
                                     onClose();
                                 }}
                                 className="flex-1 rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-100 dark:to-slate-200 px-4 py-2.5 text-sm font-medium text-white dark:text-slate-900 shadow-lg shadow-slate-900/25 dark:shadow-slate-900/50 transition-all hover:from-slate-700 hover:to-slate-800 dark:hover:from-white dark:hover:to-slate-100 hover:shadow-xl hover:shadow-slate-900/30 active:scale-[0.98]"
