@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition font-medium shadow-sm hover:shadow;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition font-medium;
+  }
+
+  .card {
+    @apply rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow-md transition;
+  }
+}
+
+a {
+  @apply text-slate-900 hover:text-slate-700 transition underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900;
+}
+
+a[target="_blank"]::after {
+  content: "↗";
+  margin-left: 0.25rem;
+  font-size: 0.75em;
+  @apply text-slate-400;
+}
+
+code {
+  @apply inline-block bg-slate-100 border border-slate-200 rounded px-2 py-1 font-mono text-sm text-slate-800;
+}
+
+input[type="checkbox"] {
+  @apply w-5 h-5 appearance-none border border-slate-300 rounded-md hover:border-slate-400 checked:bg-slate-900 checked:border-slate-900 transition-colors;
+}
+
+input[type="checkbox"]:checked {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" fill="none"><path stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" d="m.917 4 2.206 2.209c.333.334.5.5.707.5.207 0 .374-.166.707-.5l5.13-5.126"/></svg>');
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Modal animations */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-modal-shake {
+  animation: modal-shake 0.4s ease-in-out;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  @apply bg-white/80 backdrop-blur-xl border border-white/20;
+}
+
+.glass-dark {
+  @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50;
+}
