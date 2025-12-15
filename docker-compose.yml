@@ -22,8 +22,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ysweet
-    ports:
-      - "8080:8080"
+    # Porta não exposta externamente - apenas acessível pela rede Docker interna
+    expose:
+      - "8080"
     volumes:
       - ysweet-data:/data
     restart: unless-stopped
