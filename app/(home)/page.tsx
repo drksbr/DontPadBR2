@@ -37,9 +37,7 @@ export default function HomePage() {
                         >
                             Recursos
                         </a>
-                        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-900 transition no-underline">
-                            GitHub
-                        </a>
+
                     </nav>
                 </div>
             </header>
@@ -157,7 +155,7 @@ export default function HomePage() {
                         <span className="font-semibold text-slate-700">DontPad BR</span>
                     </div>
                     <p>
-                        &copy; {new Date().getFullYear()} DontPad BR. Open Source.
+                        &copy; {new Date().getFullYear()} DontPad BR. Todos os direitos reservados.
                     </p>
                 </div>
             </footer>
