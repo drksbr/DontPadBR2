@@ -1,6 +1,5 @@
 import { DocumentManager } from "@y-sweet/sdk";
 import { YDocProvider } from "@y-sweet/react";
-import { DocumentView } from "@/components/DocumentView";
 import { sanitizeDocumentId } from "@/lib/colors";
 
 const manager = new DocumentManager(
@@ -11,7 +10,6 @@ interface DocumentLayoutProps {
     children: React.ReactNode;
     params: Promise<{
         documentId: string;
-        subdocumentName?: string;
     }>;
 }
 
@@ -22,7 +20,7 @@ export default async function DocumentLayout({
     children,
     params
 }: DocumentLayoutProps) {
-    const { documentId, subdocumentName } = await params;
+    const { documentId } = await params;
     const sanitizedId = sanitizeDocumentId(decodeURIComponent(documentId));
 
     async function getClientToken() {
@@ -32,7 +30,7 @@ export default async function DocumentLayout({
 
     return (
         <YDocProvider docId={sanitizedId} authEndpoint={getClientToken} showDebuggerLink={false} offlineSupport={true}>
-            <DocumentView documentId={documentId} subdocumentName={subdocumentName} />
+            {children}
         </YDocProvider>
     );
 }

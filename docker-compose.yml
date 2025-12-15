@@ -1,0 +1,39 @@
+services:
+  # Next.js application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - CONNECTION_STRING=ys://ysweet:8080
+    volumes:
+      - app-data:/app/.data
+    depends_on:
+      - ysweet
+    restart: unless-stopped
+    networks:
+      - dontpad-network
+
+  # Y-Sweet collaboration server
+  ysweet:
+    build:
+      context: .
+      dockerfile: Dockerfile.ysweet
+    ports:
+      - "8080:8080"
+    volumes:
+      - ysweet-data:/data
+    restart: unless-stopped
+    networks:
+      - dontpad-network
+
+networks:
+  dontpad-network:
+    driver: bridge
+
+volumes:
+  ysweet-data:
+  app-data:
