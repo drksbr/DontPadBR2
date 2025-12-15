@@ -14,15 +14,15 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition font-medium shadow-sm hover:shadow;
+    @apply px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition font-medium shadow-sm hover:shadow;
   }
 
   .btn-secondary {
-    @apply px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition font-medium;
+    @apply px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition font-medium;
   }
 
   .card {
-    @apply rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow-md transition;
+    @apply rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition;
   }
 }
 
@@ -78,6 +78,14 @@
   flex-shrink: 0 !important;
 }
 
+@media (prefers-color-scheme: dark) {
+  .bn-block-content[data-content-type="checkListItem"] > input,
+  .bn-block-content input[type="checkbox"] {
+    border-color: #4b5563 !important;
+    background-color: #1f2937 !important;
+  }
+}
+
 .bn-block-content[data-content-type="checkListItem"] > input:checked,
 .bn-block-content input[type="checkbox"]:checked {
   background-color: #1f2937 !important;
@@ -87,27 +95,42 @@
   background-position: center !important;
 }
 
+@media (prefers-color-scheme: dark) {
+  .bn-block-content[data-content-type="checkListItem"] > input:checked,
+  .bn-block-content input[type="checkbox"]:checked {
+    background-color: #e2e8f0 !important;
+    border-color: #e2e8f0 !important;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="8" fill="none"><path stroke="%231f2937" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m1 4 2.5 2.5L9 1"/></svg>') !important;
+  }
+}
+
 a {
-  @apply text-slate-900 hover:text-slate-700 transition underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900;
+  @apply text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 transition underline decoration-slate-300 dark:decoration-slate-600 underline-offset-4 hover:decoration-slate-900 dark:hover:decoration-slate-100;
 }
 
 a[target="_blank"]::after {
   content: "↗";
   margin-left: 0.25rem;
   font-size: 0.75em;
-  @apply text-slate-400;
+  @apply text-slate-400 dark:text-slate-500;
 }
 
 code {
-  @apply inline-block bg-slate-100 border border-slate-200 rounded px-2 py-1 font-mono text-sm text-slate-800;
+  @apply inline-block bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 font-mono text-sm text-slate-800 dark:text-slate-200;
 }
 
 input[type="checkbox"] {
-  @apply w-5 h-5 appearance-none border border-slate-300 rounded-md hover:border-slate-400 checked:bg-slate-900 checked:border-slate-900 transition-colors;
+  @apply w-5 h-5 appearance-none border border-slate-300 dark:border-slate-600 rounded-md hover:border-slate-400 dark:hover:border-slate-500 checked:bg-slate-900 dark:checked:bg-slate-100 checked:border-slate-900 dark:checked:border-slate-100 transition-colors;
 }
 
 input[type="checkbox"]:checked {
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" fill="none"><path stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" d="m.917 4 2.206 2.209c.333.334.5.5.707.5.207 0 .374-.166.707-.5l5.13-5.126"/></svg>');
+}
+
+@media (prefers-color-scheme: dark) {
+  input[type="checkbox"]:checked {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="11" height="8" fill="none"><path stroke="%231f2937" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" d="m.917 4 2.206 2.209c.333.334.5.5.707.5.207 0 .374-.166.707-.5l5.13-5.126"/></svg>');
+  }
 }
 
 /* Custom scrollbar */
@@ -121,12 +144,12 @@ input[type="checkbox"]:checked {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  @apply bg-slate-300 dark:bg-slate-600;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  @apply bg-slate-400 dark:bg-slate-500;
 }
 
 /* Modal animations */
@@ -169,7 +192,7 @@ input[type="checkbox"]:checked {
 
 /* Glassmorphism utilities */
 .glass {
-  @apply bg-white/80 backdrop-blur-xl border border-white/20;
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50;
 }
 
 .glass-dark {
@@ -311,7 +334,7 @@ input[type="checkbox"]:checked {
 
 /* Collaboration Demo Styles */
 .collab-demo {
-  @apply relative overflow-hidden rounded-xl border border-slate-200 bg-white;
+  @apply relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800;
 }
 
 .collab-line {

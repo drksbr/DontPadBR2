@@ -41,9 +41,24 @@ cd dontpad
 # Copiar arquivo de exemplo
 cp .env.example .env
 
-# Editar se necessário (geralmente não precisa para Docker)
+# Editar o arquivo .env
 nano .env
 ```
+
+### ⚠️ IMPORTANTE: Configurar URL do Y-Sweet para HTTPS
+
+Se você está usando HTTPS (recomendado), você **DEVE** configurar a variável `YSWEET_URL_PREFIX` com a URL pública do seu domínio. Isso é necessário para que o WebSocket funcione corretamente via WSS (WebSocket Secure).
+
+```bash
+# Adicione esta linha ao seu .env
+YSWEET_URL_PREFIX=wss://seu-dominio.com.br/y-sweet
+```
+
+**Por que isso é necessário?**
+
+- Quando sua página é servida via HTTPS, o navegador bloqueia conexões WebSocket não seguras (ws://)
+- O Y-Sweet precisa saber qual é a URL pública para retornar ao cliente
+- Sem isso, você verá o erro: "Mixed Content: ... attempted to connect to the insecure WebSocket endpoint 'ws://...'"
 
 ## 4. Build e Deploy
 
@@ -167,8 +182,15 @@ docker compose logs ysweet
 
 ### WebSocket não conecta
 
-- Verifique se o Nginx está configurado corretamente para WebSocket
-- Verifique se a porta 8080 está acessível internamente
+- **Erro "Mixed Content" ou conexão ws:// bloqueada:**
+
+  - Verifique se `YSWEET_URL_PREFIX` está configurado no `.env`
+  - Deve ser `wss://seu-dominio.com.br/y-sweet` (com wss://, não ws://)
+  - Após alterar, reinicie os containers: `docker compose down && docker compose up -d`
+
+- Verifique se o Nginx está configurado corretamente para WebSocket (location /y-sweet/)
+- Verifique se a porta 8080 está exposta no docker-compose.yml
+- Teste se o Y-Sweet está respondendo: `curl http://localhost:8080/check_store`
 
 ### Build do y-sweet demora muito
 

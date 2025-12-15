@@ -23,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={inter.className}>
-      <body className="bg-white text-gray-900">
+      <body className="bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 transition-colors">
         <LinkifyInit />
         {children}
       </body>

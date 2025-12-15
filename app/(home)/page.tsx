@@ -22,34 +22,34 @@ export default function HomePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans text-slate-900 dark:text-slate-100 transition-colors">
             {/* Header */}
-            <header className="border-b border-slate-200 bg-white/80 backdrop-blur-lg sticky top-0 z-10">
+            <header className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-10">
                 <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
-                            <span className="text-white font-bold text-sm tracking-tighter">DP</span>
+                        <div className="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded flex items-center justify-center">
+                            <span className="text-white dark:text-slate-900 font-bold text-sm tracking-tighter">DP</span>
                         </div>
-                        <h1 className="text-lg font-semibold text-slate-900 tracking-tight">
+                        <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
                             DontPad BR
                         </h1>
                     </div>
                     <nav className="flex gap-8 text-sm font-medium">
                         <a
                             href="#demo"
-                            className="text-slate-600 hover:text-slate-900 transition no-underline"
+                            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition no-underline"
                         >
                             Demo
                         </a>
                         <a
                             href="#features"
-                            className="text-slate-600 hover:text-slate-900 transition no-underline"
+                            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition no-underline"
                         >
                             Recursos
                         </a>
                         <a
                             href="#metrics"
-                            className="text-slate-600 hover:text-slate-900 transition no-underline"
+                            className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition no-underline"
                         >
                             Métricas
                         </a>
@@ -59,15 +59,15 @@ export default function HomePage() {
 
             {/* Hero Section */}
             <main className="flex-1">
-                <section className="flex flex-col items-center justify-center px-6 py-24 bg-gradient-to-b from-slate-50 to-white">
+                <section className="flex flex-col items-center justify-center px-6 py-24 bg-gradient-to-b from-slate-50 dark:from-slate-950 to-white dark:to-slate-900">
                     <div className="text-center mb-12 max-w-3xl animate-fade-in-up">
-                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 tracking-tight leading-tight">
+                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-6 tracking-tight leading-tight">
                             Colaboração em texto,<br />
-                            <span className="text-slate-500 relative inline-block min-h-[1.2em] pl-8">
+                            <span className="text-slate-500 dark:text-slate-400 relative inline-block min-h-[1.2em] pl-8">
                                 <HeroTypingAnimation />
                             </span>
                         </h2>
-                        <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
                             Edição de texto em tempo real, sem cadastro, sem complicações.
                             A ferramenta ideal para notas rápidas, snippets de código e colaboração instantânea.
                         </p>
@@ -76,26 +76,26 @@ export default function HomePage() {
 
                     {/* Create Document Form */}
                     <div className="w-full max-w-md mb-16 animate-fade-in-up animation-delay-200">
-                        <form onSubmit={handleCreateDocument} className="flex gap-2 shadow-lg p-1.5 bg-white rounded-xl border border-slate-200 hover:shadow-xl transition-shadow duration-300">
+                        <form onSubmit={handleCreateDocument} className="flex gap-2 shadow-lg dark:shadow-slate-900/50 p-1.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow duration-300">
                             <div className="flex-1 flex items-center px-4">
-                                <span className="text-slate-400 mr-1">/</span>
+                                <span className="text-slate-400 dark:text-slate-500 mr-1">/</span>
                                 <input
                                     type="text"
                                     placeholder="seu-documento"
                                     value={documentName}
                                     onChange={(e) => setDocumentName(e.target.value)}
-                                    className="flex-1 py-3 bg-transparent border-none focus:outline-none text-slate-900 placeholder-slate-400"
+                                    className="flex-1 py-3 bg-transparent border-none focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                                 />
                             </div>
                             <button
                                 type="submit"
                                 disabled={!documentName.trim()}
-                                className="px-8 py-3 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
+                                className="px-8 py-3 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg font-medium hover:bg-slate-800 dark:hover:bg-slate-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
                             >
                                 Ir →
                             </button>
                         </form>
-                        <p className="text-xs text-slate-500 mt-3 text-center">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">
                             Digite o nome de um documento para criar ou acessar.
                         </p>
                     </div>
@@ -127,13 +127,13 @@ export default function HomePage() {
                 </section>
 
                 {/* Collaboration Demo Section */}
-                <section id="demo" className="py-24 px-6 bg-slate-50 border-t border-slate-200">
+                <section id="demo" className="py-24 px-6 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
                     <div className="max-w-6xl mx-auto">
                         <div className="text-center mb-12">
-                            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+                            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">
                                 Veja a colaboração em ação
                             </h3>
-                            <p className="text-slate-600 max-w-xl mx-auto">
+                            <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
                                 Múltiplos usuários editando simultaneamente, com cursores coloridos e sincronização instantânea.
                             </p>
                         </div>
@@ -147,13 +147,13 @@ export default function HomePage() {
                 </div>
 
                 {/* Features Section */}
-                <section id="features" className="border-t border-slate-200 bg-white py-24 px-6">
+                <section id="features" className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-24 px-6">
                     <div className="max-w-6xl mx-auto">
                         <div className="text-center mb-16">
-                            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+                            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">
                                 Simplicidade em primeiro lugar
                             </h3>
-                            <p className="text-slate-600 max-w-xl mx-auto">
+                            <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
                                 Focado na velocidade e facilidade de uso. Sem distrações, apenas o essencial.
                             </p>
                         </div>
@@ -218,7 +218,7 @@ export default function HomePage() {
                 </section>
 
                 {/* CTA Section */}
-                <section className="py-20 px-6 bg-slate-900 text-white">
+                <section className="py-20 px-6 bg-slate-900 dark:bg-slate-800 text-white">
                     <div className="max-w-4xl mx-auto text-center">
                         <h3 className="text-3xl md:text-4xl font-bold mb-6">
                             Pronto para colaborar?
@@ -235,7 +235,7 @@ export default function HomePage() {
                             </Link>
                             <a
                                 href="#demo"
-                                className="inline-flex items-center justify-center px-8 py-4 border border-slate-700 text-white rounded-lg font-semibold hover:bg-slate-800 transition no-underline"
+                                className="inline-flex items-center justify-center px-8 py-4 border border-slate-700 dark:border-slate-600 text-white rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-700 transition no-underline"
                             >
                                 Ver demo
                             </a>
@@ -245,18 +245,18 @@ export default function HomePage() {
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-slate-200 bg-white py-12 px-6">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500">
+            <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-12 px-6">
+                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
                     <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 bg-slate-900 rounded flex items-center justify-center">
-                            <span className="text-white font-bold text-xs">DP</span>
+                        <div className="w-5 h-5 bg-slate-900 dark:bg-slate-100 rounded flex items-center justify-center">
+                            <span className="text-white dark:text-slate-900 font-bold text-xs">DP</span>
                         </div>
-                        <span className="font-semibold text-slate-700">DontPad BR</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">DontPad BR</span>
                     </div>
                     <div className="flex items-center gap-6">
-                        <a href="#features" className="hover:text-slate-700 transition no-underline">Recursos</a>
-                        <a href="#demo" className="hover:text-slate-700 transition no-underline">Demo</a>
-                        <a href="#metrics" className="hover:text-slate-700 transition no-underline">Métricas</a>
+                        <a href="#features" className="hover:text-slate-700 dark:hover:text-slate-300 transition no-underline">Recursos</a>
+                        <a href="#demo" className="hover:text-slate-700 dark:hover:text-slate-300 transition no-underline">Demo</a>
+                        <a href="#metrics" className="hover:text-slate-700 dark:hover:text-slate-300 transition no-underline">Métricas</a>
                     </div>
                     <p>
                         &copy; {new Date().getFullYear()} DontPad BR. Todos os direitos reservados.
@@ -283,13 +283,13 @@ function ExampleCard({
     return (
         <Link href={`/${encodeURIComponent(docName)}`} className="no-underline group">
             <div
-                className="p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-lg transition-all duration-300 h-full transform hover:-translate-y-1"
+                className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg dark:hover:shadow-slate-900/50 transition-all duration-300 h-full transform hover:-translate-y-1"
             >
                 <div className="flex items-center gap-3 mb-3">
                     <span className="text-2xl grayscale group-hover:grayscale-0 transition-all duration-300">{icon}</span>
-                    <h4 className="font-semibold text-slate-900">{title}</h4>
+                    <h4 className="font-semibold text-slate-900 dark:text-slate-100">{title}</h4>
                 </div>
-                <p className="text-slate-600 text-sm leading-relaxed">{description}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{description}</p>
             </div>
         </Link>
     );
@@ -306,12 +306,12 @@ function Feature({
 }) {
     return (
         <div className="flex gap-4 group">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-100 group-hover:text-white dark:group-hover:text-slate-900 transition-all duration-300">
                 {icon}
             </div>
             <div>
-                <h4 className="font-semibold text-slate-900 text-lg mb-1">{title}</h4>
-                <p className="text-slate-600 text-sm leading-relaxed">{description}</p>
+                <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-lg mb-1">{title}</h4>
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{description}</p>
             </div>
         </div>
     );

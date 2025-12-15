@@ -31,6 +31,17 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     const [hideToast, setHideToast] = useState(false);
     const [showSwitchModal, setShowSwitchModal] = useState(false);
     const previousEditorType = useRef<"blocknote" | "codemirror">("codemirror");
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    // Detectar tema do sistema
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        setIsDarkMode(mediaQuery.matches);
+
+        const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+        mediaQuery.addEventListener("change", handler);
+        return () => mediaQuery.removeEventListener("change", handler);
+    }, []);
 
     // Generate deterministic fragment key that includes both document and subdocument info
     const fragmentKey = subdocumentName
@@ -125,43 +136,43 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-white font-sans text-slate-900">
+        <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100 transition-colors">
             {/* Header */}
-            <header className="border-b border-slate-200 bg-white sticky top-0 z-20">
+            <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link
                             href="/"
-                            className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-white font-bold text-sm tracking-tighter hover:text-gray-400 hover:tracking-tighter transition"
+                            className="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded flex items-center justify-center text-white dark:text-slate-900 font-bold text-sm tracking-tighter hover:text-gray-400 dark:hover:text-slate-600 hover:tracking-tighter transition"
                         >
                             DP
                         </Link>
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-1 text-sm font-semibold text-slate-900 leading-tight">
+                            <div className="flex items-center gap-1 text-sm font-semibold text-slate-900 dark:text-slate-100 leading-tight">
                                 <Link
                                     href={`/${encodeURIComponent(documentId)}`}
-                                    className="hover:text-slate-700 transition"
+                                    className="hover:text-slate-700 dark:hover:text-slate-300 transition"
                                 >
                                     {decodeURIComponent(documentId)}
                                 </Link>
                                 {subdocumentName && (
                                     <>
-                                        <span className="text-slate-300">/</span>
-                                        <span className="text-slate-600">{decodeURIComponent(subdocumentName)}</span>
+                                        <span className="text-slate-300 dark:text-slate-600">/</span>
+                                        <span className="text-slate-600 dark:text-slate-400">{decodeURIComponent(subdocumentName)}</span>
                                     </>
                                 )}
                             </div>
-                            <span className="text-xs text-slate-500">Sincronizado</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Sincronizado</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         {/* Editor Toggle Button */}
                         <button
                             onClick={handleEditorSwitchRequest}
-                            className="group relative flex items-center justify-center gap-2 p-2 md:px-3 md:py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200"
+                            className="group relative flex items-center justify-center gap-2 p-2 md:px-3 md:py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm transition-all duration-200"
                             title={`Trocar para ${editorType === "blocknote" ? "CodeMirror" : "BlockNote"}`}
                         >
-                            <EditorSwitchIcon className="w-4 h-4 text-slate-500 group-hover:text-slate-700 transition-colors" />
+                            <EditorSwitchIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors" />
                             <span className="hidden md:inline text-sm font-medium">
                                 {editorType === "blocknote" ? "BlockNote" : "CodeMirror"}
                             </span>
@@ -169,13 +180,13 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
 
                         <button
                             onClick={() => setShowSubdocs(!showSubdocs)}
-                            className="px-2 py-1.5 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition text-sm font-medium"
+                            className="px-2 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition text-sm font-medium"
                         >
                             {showSubdocs ? "Fechar" : "Subdocs"}
                         </button>
                         <button
                             onClick={handleCopyLink}
-                            className="p-2 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition"
+                            className="p-2 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition"
                             title="Copiar link"
                             aria-label="Copiar link"
                         >
@@ -212,11 +223,11 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Editor */}
-                <div className="flex-1 overflow-auto bg-white w-full">
+                <div className="flex-1 overflow-auto bg-white dark:bg-slate-900 w-full">
                     <div className={`w-full md:max-w-7xl md:mx-auto md:px-6 md:pt-6 ${editorType === "codemirror" ? "h-full flex flex-col md:pb-6" : "py-4 md:py-12 px-2 md:px-6"
                         }`}>
                         {editorType === "blocknote" ? (
-                            <BlockNoteView editor={editor} theme="light" />
+                            <BlockNoteView editor={editor} theme={isDarkMode ? "dark" : "light"} />
                         ) : (
                             <CodeMirrorEditor doc={doc} fragmentKey={textKey} provider={provider} user={{ name: "Colaborador", color: "#1f2937" }} />
                         )}
@@ -225,7 +236,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
 
                 {/* Subdocuments Panel */}
                 {showSubdocs && (
-                    <aside className="w-80 border-l border-slate-200 bg-slate-50 overflow-auto">
+                    <aside className="w-80 border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 overflow-auto">
                         <SubdocumentManager documentId={documentId} />
                     </aside>
                 )}

@@ -104,14 +104,14 @@ export function CollaborationDemo() {
             {/* Editor Window */}
             <div className="collab-demo shadow-xl">
                 {/* Window Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                     <div className="flex items-center gap-2">
                         <div className="flex gap-1.5">
-                            <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                            <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                            <div className="w-3 h-3 rounded-full bg-slate-300"></div>
+                            <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                            <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                            <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                         </div>
-                        <span className="text-xs text-slate-400 ml-2 font-mono">/reuniao-sprint</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 ml-2 font-mono">/reuniao-sprint</span>
                     </div>
 
                     {/* Active Users */}
@@ -119,28 +119,28 @@ export function CollaborationDemo() {
                         {activeUsers.map((userIndex, i) => (
                             <div
                                 key={userIndex}
-                                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-100 animate-fade-in"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700 animate-fade-in"
                                 style={{ animationDelay: `${i * 100}ms` }}
                             >
                                 <div
                                     className="w-2 h-2 rounded-full"
                                     style={{ backgroundColor: users[userIndex].color }}
                                 ></div>
-                                <span className="text-xs text-slate-600">{users[userIndex].name}</span>
+                                <span className="text-xs text-slate-600 dark:text-slate-300">{users[userIndex].name}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Editor Content */}
-                <div className="p-6 min-h-[280px] font-mono text-sm bg-white">
+                <div className="p-6 min-h-[280px] font-mono text-sm bg-white dark:bg-slate-800">
                     {lines.map((line, index) => (
                         <div key={index} className="flex items-start min-h-[1.75rem]">
-                            <span className="w-6 text-slate-300 text-right mr-4 select-none text-xs">
+                            <span className="w-6 text-slate-300 dark:text-slate-600 text-right mr-4 select-none text-xs">
                                 {index + 1}
                             </span>
                             <div className="flex-1 flex items-center">
-                                <span className={`${line.text.startsWith('#') ? 'font-semibold text-slate-900' : 'text-slate-700'}`}>
+                                <span className={`${line.text.startsWith('#') ? 'font-semibold text-slate-900 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
                                     {line.text}
                                 </span>
                                 {!line.completed && index === lines.length - 1 && (
@@ -153,7 +153,7 @@ export function CollaborationDemo() {
                         </div>
                     ))}
                     {lines.length === 0 && (
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-slate-300 dark:text-slate-600">
                             <span className="w-6 text-right mr-4 text-xs">1</span>
                             <span className="w-0.5 h-4 bg-blue-500 animate-typing-cursor rounded-full"></span>
                         </div>
@@ -162,7 +162,7 @@ export function CollaborationDemo() {
             </div>
 
             {/* Caption */}
-            <p className="text-center text-sm text-slate-500 mt-4">
+            <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4">
                 Colaboração em tempo real • Múltiplos cursores • Sincronização instantânea
             </p>
         </div>

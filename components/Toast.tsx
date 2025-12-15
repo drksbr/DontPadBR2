@@ -22,7 +22,7 @@ export function useToast() {
 export function Toast({ message, onClose }: { message: string; onClose: () => void }) {
     return (
         <div
-            className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300 z-50"
+            className="fixed bottom-6 right-6 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300 z-50"
             role="alert"
         >
             <svg
@@ -41,7 +41,7 @@ export function Toast({ message, onClose }: { message: string; onClose: () => vo
             <span className="text-sm font-medium">{message}</span>
             <button
                 onClick={onClose}
-                className="ml-2 text-slate-300 hover:text-white transition"
+                className="ml-2 text-slate-300 dark:text-slate-600 hover:text-white dark:hover:text-slate-900 transition"
                 aria-label="Close"
             >
                 <svg

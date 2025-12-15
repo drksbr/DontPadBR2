@@ -60,20 +60,20 @@ export function EditorSwitchModal({
         >
             {/* Backdrop com glassmorfismo */}
             <div
-                className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-all duration-300 ${isAnimating ? "opacity-100" : "opacity-0"
+                className={`absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm transition-all duration-300 ${isAnimating ? "opacity-100" : "opacity-0"
                     }`}
             />
 
             {/* Modal */}
             <div
                 className={`relative w-full max-w-md transform transition-all duration-300 ease-out ${isAnimating
-                        ? "scale-100 translate-y-0 opacity-100"
-                        : "scale-95 translate-y-4 opacity-0"
+                    ? "scale-100 translate-y-0 opacity-100"
+                    : "scale-95 translate-y-4 opacity-0"
                     }`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Card com glassmorfismo */}
-                <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/80 backdrop-blur-xl shadow-2xl">
+                <div className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl">
                     {/* Efeito de brilho no topo */}
                     <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
 
@@ -84,9 +84,9 @@ export function EditorSwitchModal({
                     {/* Conteúdo */}
                     <div className="relative p-6">
                         {/* Ícone de aviso */}
-                        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100/80 backdrop-blur-sm">
+                        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100/80 dark:bg-amber-900/30 backdrop-blur-sm">
                             <svg
-                                className="h-7 w-7 text-amber-600"
+                                className="h-7 w-7 text-amber-600 dark:text-amber-400"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
@@ -101,14 +101,14 @@ export function EditorSwitchModal({
                         </div>
 
                         {/* Título */}
-                        <h3 className="mb-2 text-center text-lg font-semibold text-slate-900">
+                        <h3 className="mb-2 text-center text-lg font-semibold text-slate-900 dark:text-slate-100">
                             Trocar para {targetEditor}?
                         </h3>
 
                         {/* Descrição */}
-                        <p className="mb-6 text-center text-sm text-slate-600 leading-relaxed">
+                        <p className="mb-6 text-center text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                             Ao trocar de editor, algumas{" "}
-                            <span className="font-medium text-amber-700">formatações podem ser perdidas</span>.
+                            <span className="font-medium text-amber-700 dark:text-amber-400">formatações podem ser perdidas</span>.
                             O conteúdo de texto será mantido, mas estilos específicos de cada editor podem não ser preservados.
                         </p>
 
@@ -116,7 +116,7 @@ export function EditorSwitchModal({
                         <div className="flex gap-3">
                             <button
                                 onClick={onClose}
-                                className="flex-1 rounded-xl border border-slate-200 bg-white/60 px-4 py-2.5 text-sm font-medium text-slate-700 backdrop-blur-sm transition-all hover:bg-white hover:border-slate-300 hover:shadow-sm active:scale-[0.98]"
+                                className="flex-1 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/60 dark:bg-slate-700/60 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 backdrop-blur-sm transition-all hover:bg-white dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-sm active:scale-[0.98]"
                             >
                                 Cancelar
                             </button>
@@ -125,7 +125,7 @@ export function EditorSwitchModal({
                                     onConfirm();
                                     onClose();
                                 }}
-                                className="flex-1 rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-slate-900/25 transition-all hover:from-slate-700 hover:to-slate-800 hover:shadow-xl hover:shadow-slate-900/30 active:scale-[0.98]"
+                                className="flex-1 rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-100 dark:to-slate-200 px-4 py-2.5 text-sm font-medium text-white dark:text-slate-900 shadow-lg shadow-slate-900/25 dark:shadow-slate-900/50 transition-all hover:from-slate-700 hover:to-slate-800 dark:hover:from-white dark:hover:to-slate-100 hover:shadow-xl hover:shadow-slate-900/30 active:scale-[0.98]"
                             >
                                 Confirmar troca
                             </button>

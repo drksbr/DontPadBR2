@@ -57,7 +57,7 @@ export function LiveStatsIndicator() {
     }, [currentStat.value]);
 
     return (
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/5 border border-slate-200 text-slate-600 text-sm font-medium mt-8">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/5 dark:bg-slate-100/5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium mt-8">
             <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -65,11 +65,11 @@ export function LiveStatsIndicator() {
             <span
                 className={`transition-all duration-300 ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}
             >
-                <span className="font-semibold text-slate-900 tabular-nums">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
                     {displayValue.toLocaleString('pt-BR')}{currentStat.suffix}
                 </span>
                 {" "}
-                <span className="text-slate-500">
+                <span className="text-slate-500 dark:text-slate-400">
                     {currentStat.text}
                 </span>
             </span>

@@ -81,7 +81,7 @@ export function SubdocumentManager({ documentId }: SubdocumentManagerProps) {
 
     return (
         <div className="p-6 h-full flex flex-col">
-            <h2 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wider">Subdocumentos</h2>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4 uppercase tracking-wider">Subdocumentos</h2>
 
             {/* Create Subdocument Form */}
             <form onSubmit={handleCreateSubdoc} className="mb-6 flex flex-col gap-2">
@@ -91,12 +91,12 @@ export function SubdocumentManager({ documentId }: SubdocumentManagerProps) {
                     value={newSubdocName}
                     onChange={(e) => setNewSubdocName(e.target.value)}
                     disabled={isLoading}
-                    className="px-3 py-2 rounded-md border border-slate-300 bg-white focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 text-sm placeholder-slate-400 text-slate-900"
+                    className="px-3 py-2 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:border-slate-500 dark:focus:border-slate-400 focus:ring-1 focus:ring-slate-500 dark:focus:ring-slate-400 text-sm placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-slate-100"
                 />
                 <button
                     type="submit"
                     disabled={!newSubdocName.trim() || isLoading}
-                    className="px-3 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition disabled:opacity-50 text-sm font-medium"
+                    className="px-3 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-md hover:bg-slate-800 dark:hover:bg-slate-200 transition disabled:opacity-50 text-sm font-medium"
                 >
                     {isLoading ? "Criando..." : "Criar Subdocumento"}
                 </button>
@@ -105,26 +105,26 @@ export function SubdocumentManager({ documentId }: SubdocumentManagerProps) {
             {/* Subdocuments List */}
             <div className="flex-1 overflow-y-auto">
                 {subdocs.length === 0 ? (
-                    <p className="text-slate-500 text-sm text-center py-4">Nenhum subdocumento criado.</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm text-center py-4">Nenhum subdocumento criado.</p>
                 ) : (
                     <ul className="space-y-2">
                         {subdocs.map((subdoc) => (
                             <li key={subdoc.id} className="group relative">
                                 <Link href={`/${encodeURIComponent(documentId)}/${encodeURIComponent(subdoc.name)}`} className="block">
-                                    <div className="p-3 rounded-md border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm transition cursor-pointer">
+                                    <div className="p-3 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm transition cursor-pointer">
                                         <div className="flex justify-between items-start">
-                                            <h3 className="font-medium text-slate-900 text-sm truncate pr-6">
+                                            <h3 className="font-medium text-slate-900 dark:text-slate-100 text-sm truncate pr-6">
                                                 {subdoc.name}
                                             </h3>
                                         </div>
-                                        <p className="text-xs text-slate-500 mt-1">
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                             {new Date(subdoc.createdAt).toLocaleDateString("pt-BR")}
                                         </p>
                                     </div>
                                 </Link>
                                 <button
                                     onClick={() => handleDeleteSubdoc(subdoc.id)}
-                                    className="absolute top-3 right-3 text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition p-1"
+                                    className="absolute top-3 right-3 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-1"
                                     title="Excluir"
                                 >
                                     <svg

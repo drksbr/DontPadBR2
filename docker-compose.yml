@@ -22,9 +22,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ysweet
-    # Porta não exposta externamente - apenas acessível pela rede Docker interna
-    expose:
-      - "8080"
+    ports:
+      # Porta 4001 para o Nginx Proxy Manager fazer proxy reverso
+      - "4001:8080"
+    environment:
+      # URL pública para o cliente conectar via WebSocket (wss://)
+      # Usando subdomínio api.dontpad.com.br
+      - URL_PREFIX=${YSWEET_URL_PREFIX:-wss://api.dontpad.com.br}
     volumes:
       - ysweet-data:/data
     restart: unless-stopped

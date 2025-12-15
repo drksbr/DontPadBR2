@@ -94,7 +94,7 @@ export function MetricsSection() {
     return (
         <section
             ref={sectionRef}
-            className="py-24 px-6 bg-slate-900 text-white overflow-hidden"
+            className="py-24 px-6 bg-slate-900 dark:bg-slate-950 text-white overflow-hidden"
         >
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
