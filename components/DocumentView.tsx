@@ -14,10 +14,9 @@ import Link from "next/link";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
 import { generateSubdocumentFragmentKey, getCollaboratorColor } from "@/lib/colors";
-import { syncXmlFragmentToText } from "@/lib/editorSync";
+import { syncXmlFragmentToText, syncTextToXmlFragment } from "@/lib/editorSync";
 import { EditorSwitchModal, EditorSwitchIcon } from "./EditorSwitchModal";
 import { SyncStatus } from "./SyncStatus";
-import { useSyncStatus } from "@/lib/useSyncStatus";
 
 interface DocumentViewProps {
     documentId: string;
@@ -34,7 +33,6 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     const [showSwitchModal, setShowSwitchModal] = useState(false);
     const previousEditorType = useRef<"blocknote" | "codemirror">("codemirror");
     const hasInitialized = useRef(false);
-    const isSettingMeta = useRef(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [collaboratorColor, setCollaboratorColor] = useState(() => getCollaboratorColor(false));
 
@@ -73,36 +71,23 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
             } else {
                 const saved = localStorage.getItem("editor-preference") as "blocknote" | "codemirror" | null;
                 if (saved) {
-                    console.debug("init: setting editorType from localStorage", { saved });
                     setEditorType(saved);
                     previousEditorType.current = saved;
-                    isSettingMeta.current = true;
-                    try {
-                        meta.set(key, saved);
-                    } finally {
-                        // small delay to avoid immediate observer reaction
-                        setTimeout(() => (isSettingMeta.current = false), 200);
-                    }
+                    meta.set(key, saved);
                 }
             }
 
             // mark as initialized to avoid running sync conversions on initial mount
-            // Use a microtask to avoid race conditions where the swap effect
-            // could run before we finish setting `previousEditorType`.
-            setTimeout(() => {
-                hasInitialized.current = true;
-                console.debug("initialization complete", { editorType, previous: previousEditorType.current });
-            }, 0);
+            hasInitialized.current = true;
 
             const observer = (events: any) => {
                 try {
-                    if (isSettingMeta.current) return;
                     const val = meta.get(key) as "blocknote" | "codemirror" | undefined | null;
                     console.debug("metadata.observer fired", { key, val, previous: previousEditorType.current });
                     if (val && val !== previousEditorType.current) {
                         console.debug("metadata.observer updating editorType", { from: previousEditorType.current, to: val });
-                        setEditorType(val);
-                        previousEditorType.current = val;
+                        // Apply change; this was originated remotely
+                        applyEditorChange(previousEditorType.current as "blocknote" | "codemirror", val, false).catch((e) => console.debug("applyEditorChange:error", e));
                     }
                 } catch (e) {
                     console.debug("metadata.observer:error", e);
@@ -121,8 +106,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
                 setEditorType(saved);
                 previousEditorType.current = saved;
             }
-            // Use microtask to set initialized in fallback too
-            setTimeout(() => (hasInitialized.current = true), 0);
+            hasInitialized.current = true;
         }
     }, [doc, fragmentKey]);
 
@@ -135,90 +119,82 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
         },
     });
 
-    const { isSynced } = useSyncStatus();
+    // Funções para sincronizar explicitamente (chamadas apenas em ações de usuário
+    // ou quando a mudança de editor é observada no metadata)
+    const syncToCodeMirror = useCallback(() => {
+        const xmlFragment = doc.getXmlFragment(fragmentKey);
+        const yText = doc.getText(textKey);
+        console.debug("syncToCodeMirror: XmlFragment -> Y.Text (before)", { xmlLength: xmlFragment.length, yTextBefore: yText.toString().slice(0, 200) });
+        syncXmlFragmentToText(xmlFragment, yText, doc);
+        console.debug("syncToCodeMirror: XmlFragment -> Y.Text (after)", { yTextAfter: yText.toString().slice(0, 200) });
+        previousEditorType.current = "codemirror";
+    }, [doc, fragmentKey, textKey]);
 
-    // Sincronizar conteúdo quando trocar de editor
-    useEffect(() => {
-        const prev = previousEditorType.current;
-        const current = editorType;
-        console.debug("editor swap effect", { prev, current, isSynced });
-
-        // Devemos ignorar a primeira vez após mount/initialization
-        if (!hasInitialized.current) {
-            console.debug("editor swap effect: skipping because not initialized yet");
-            return;
+    const syncToBlockNote = useCallback(() => {
+        const xmlFragment = doc.getXmlFragment(fragmentKey);
+        const yText = doc.getText(textKey);
+        console.debug("syncToBlockNote: Y.Text -> XmlFragment");
+        // Use text->xml conversion which will be reflected to the BlockNote via Yjs
+        try {
+            syncTextToXmlFragment(yText, xmlFragment, doc);
+        } catch (e) {
+            // Fallback: try manual replace via editor if available
+            try {
+                const textContent = yText.toString();
+                const lines = textContent ? textContent.split("\n") : [""];
+                const blocks = lines.map((line) => ({ type: "paragraph" as const, content: line }));
+                editor.replaceBlocks(editor.document, blocks);
+            } catch (err) {
+                console.error("syncToBlockNote failed:", err);
+            }
         }
+        previousEditorType.current = "blocknote";
+    }, [doc, fragmentKey, textKey, editor]);
 
-        // Se não estamos sincronizados com o servidor, adie a conversão
-        if (!isSynced) {
-            console.debug("editor swap effect: skipping because provider not synced yet");
-            return;
-        }
+    // Apply a change explicitly (used by toggle and metadata observer)
+    const applyEditorChange = useCallback(
+        async (from: "blocknote" | "codemirror", to: "blocknote" | "codemirror", initiatedByUser = false) => {
+            if (from === to) return;
 
-        // Se mudou de editor, sincronizar
-        if (prev !== current) {
-            const xmlFragment = doc.getXmlFragment(fragmentKey);
-            const yText = doc.getText(textKey);
-
-            if (current === "codemirror") {
-                // Saindo do BlockNote, indo para CodeMirror
-                // Sincroniza XmlFragment -> Y.Text
-                console.debug("editor swap: XmlFragment -> Y.Text");
-                syncXmlFragmentToText(xmlFragment, yText, doc);
-            } else {
-                // Saindo do CodeMirror, indo para BlockNote
-                // Usa setTimeout para dar tempo do BlockNote se estabilizar
-                // antes de tentar atualizar o conteúdo
-                setTimeout(() => {
-                    const textContent = yText.toString();
-
-                    // Converte texto em blocos do BlockNote
-                    const lines = textContent ? textContent.split("\n") : [""];
-                    const blocks = lines.map((line) => ({
-                        type: "paragraph" as const,
-                        content: line,
-                    }));
-
-                    // Usa replaceBlocks para substituir todo o conteúdo
-                    try {
-                        console.debug("editor swap: Replacing blocks in BlockNote", { blocksCount: blocks.length });
-                        editor.replaceBlocks(editor.document, blocks);
-                    } catch (e) {
-                        console.error("Erro ao substituir blocos:", e);
-                    }
-                }, 100);
+            // If not initialized (first mount), don't perform conversions automatically
+            if (!hasInitialized.current && !initiatedByUser) {
+                console.debug("applyEditorChange: skipping initial conversion", { from, to });
+                previousEditorType.current = to;
+                setEditorType(to);
+                return;
             }
 
-            previousEditorType.current = current;
-        }
-    }, [editorType, doc, fragmentKey, textKey, editor, isSynced]);
+            if (to === "codemirror") {
+                syncToCodeMirror();
+                setEditorType("codemirror");
+            } else {
+                await syncToBlockNote();
+                setEditorType("blocknote");
+            }
+        },
+        [syncToBlockNote, syncToCodeMirror]
+    );
 
     // Toggle editor type
     const toggleEditor = useCallback(() => {
-        console.debug("toggleEditor called", { current: editorType });
-        setEditorType((prev) => {
-            const newType = prev === "blocknote" ? "codemirror" : "blocknote";
-            console.debug("toggleEditor:setEditorType", { prev, newType });
-            localStorage.setItem("editor-preference", newType);
-            // Persist per-document (and per-subdocument) preference in Y.Doc metadata
-            try {
-                const meta = doc.getMap("metadata");
-                const key = `editorType:${fragmentKey}`;
-                isSettingMeta.current = true;
-                try {
-                    meta.set(key, newType);
-                } finally {
-                    setTimeout(() => (isSettingMeta.current = false), 200);
-                }
-                console.debug("toggleEditor:meta.set", { key, newType });
-            } catch (e) {
-                console.debug("toggleEditor:meta.set:error", e);
-                isSettingMeta.current = false;
-            }
-            showToast(`Editor alterado para ${newType === "blocknote" ? "BlockNote" : "CodeMirror"}`);
-            return newType;
-        });
-    }, [showToast, doc, fragmentKey, editorType]);
+        const prev = previousEditorType.current;
+        const newType = prev === "blocknote" ? "codemirror" : "blocknote";
+        console.debug("toggleEditor called", { prev, newType });
+
+        localStorage.setItem("editor-preference", newType);
+        try {
+            const meta = doc.getMap("metadata");
+            const key = `editorType:${fragmentKey}`;
+            meta.set(key, newType);
+            console.debug("toggleEditor:meta.set", { key, newType });
+        } catch (e) {
+            console.debug("toggleEditor:meta.set:error", e);
+        }
+
+        // Apply change explicitly (user-initiated)
+        applyEditorChange(prev as "blocknote" | "codemirror", newType, true).catch((e) => console.debug("applyEditorChange:error", e));
+        showToast(`Editor alterado para ${newType === "blocknote" ? "BlockNote" : "CodeMirror"}`);
+    }, [doc, fragmentKey, applyEditorChange]);
 
     // Abrir modal de confirmação de troca
     const handleEditorSwitchRequest = useCallback(() => {
@@ -227,31 +203,22 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
 
     // Handler idempotente: define explicitamente o editor para evitar double-toggle
     const handleConfirmSwitch = useCallback((newType: "blocknote" | "codemirror") => {
+        const prev = previousEditorType.current;
         // Persist preference
         localStorage.setItem("editor-preference", newType);
         try {
             const meta = doc.getMap("metadata");
             const key = `editorType:${fragmentKey}`;
-            isSettingMeta.current = true;
-            try {
-                meta.set(key, newType);
-            } finally {
-                // Delay turning off the flag to ensure observer doesn't react
-                setTimeout(() => (isSettingMeta.current = false), 200);
-            }
+            meta.set(key, newType);
             console.debug("handleConfirmSwitch: meta.set", { key, newType });
         } catch (e) {
             console.debug("handleConfirmSwitch: meta.set:error", e);
-            isSettingMeta.current = false;
         }
 
-        // Update local state (idempotent)
-        setEditorType((prev) => {
-            if (prev === newType) return prev;
-            return newType;
-        });
+        // Apply change explicitly (user-initiated)
+        applyEditorChange(prev as "blocknote" | "codemirror", newType, true).catch((e) => console.debug("applyEditorChange:error", e));
         showToast(`Editor alterado para ${newType === "blocknote" ? "BlockNote" : "CodeMirror"}`);
-    }, [doc, fragmentKey, showToast]);
+    }, [doc, fragmentKey, applyEditorChange]);
 
     const handleCopyLink = async () => {
         try {
@@ -280,8 +247,18 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
                                 <Link
                                     href={`/${encodeURIComponent(documentId)}`}
                                     className="hover:text-slate-700 dark:hover:text-slate-300 transition"
+                                    title={decodeURIComponent(documentId)}
                                 >
-                                    {decodeURIComponent(documentId)}
+                                    {/* Mobile: truncated (<=20 -> show full, >=20 -> cut to 17 + '...') */}
+                                    <span className="inline md:hidden">
+                                        {(() => {
+                                            const name = decodeURIComponent(documentId);
+                                            return name.length >= 20 ? name.slice(0, 17) + "..." : name;
+                                        })()}
+                                    </span>
+
+                                    {/* Desktop/tablet: full name */}
+                                    <span className="hidden md:inline">{decodeURIComponent(documentId)}</span>
                                 </Link>
                                 {subdocumentName && (
                                     <>
@@ -309,9 +286,20 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
 
                         <button
                             onClick={() => setShowSubdocs(!showSubdocs)}
-                            className="px-2 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition text-sm font-medium"
+                            className="flex items-center justify-center gap-2 px-2 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition"
+                            title={showSubdocs ? "Fechar subdocs" : "Abrir subdocs"}
+                            aria-label={showSubdocs ? "Fechar subdocs" : "Abrir subdocs"}
                         >
-                            {showSubdocs ? "Fechar" : "Subdocs"}
+                            {/* Ícone sempre visível; texto só em md+ */}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 dark:text-slate-300">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span className="hidden md:inline text-sm font-medium">
+                                {showSubdocs ? "Fechar" : "Subdocs"}
+                            </span>
                         </button>
                         <button
                             onClick={handleCopyLink}
@@ -363,11 +351,35 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
                     </div>
                 </div>
 
-                {/* Subdocuments Panel */}
+                {/* Subdocuments Panel (overlay, not pushing layout) */}
                 {showSubdocs && (
-                    <aside className="w-80 border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 overflow-auto">
-                        <SubdocumentManager documentId={documentId} />
-                    </aside>
+                    <>
+                        {/* Backdrop (mobile and desktop) */}
+                        <div
+                            className="fixed inset-0 bg-black/40 z-30 md:hidden"
+                            onClick={() => setShowSubdocs(false)}
+                        />
+
+                        <aside className="fixed top-16 right-0 bottom-0 md:w-80 w-full border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 overflow-auto shadow-lg z-40 transition-transform duration-200 ease-out">
+                            <div className="flex items-start justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+                                <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Subdocuments</div>
+                                <button
+                                    onClick={() => setShowSubdocs(false)}
+                                    className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    aria-label="Fechar subdocs"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 dark:text-slate-300">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="p-4">
+                                <SubdocumentManager documentId={documentId} />
+                            </div>
+                        </aside>
+                    </>
                 )}
             </div>
 
