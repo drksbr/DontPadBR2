@@ -17,6 +17,8 @@ import { generateSubdocumentFragmentKey, getCollaboratorColor } from "@/lib/colo
 import { syncXmlFragmentToText, syncTextToXmlFragment } from "@/lib/editorSync";
 import { EditorSwitchModal, EditorSwitchIcon } from "./EditorSwitchModal";
 import { SyncStatus } from "./SyncStatus";
+import dynamic from 'next/dynamic';
+const VoiceChat = dynamic(() => import('./VoiceChat').then(m => m.VoiceChat), { ssr: false });
 
 interface DocumentViewProps {
     documentId: string;
@@ -27,6 +29,7 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     const provider = useYjsProvider();
     const doc = useYDoc();
     const [showSubdocs, setShowSubdocs] = useState(false);
+    const [showVoiceChat, setShowVoiceChat] = useState(false);
     const [editorType, setEditorType] = useState<"blocknote" | "codemirror">("codemirror");
     const { toast, showToast } = useToast();
     const [hideToast, setHideToast] = useState(false);
@@ -325,6 +328,19 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
                                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                             </svg>
                         </button>
+
+                        {/* Voice Chat */}
+                        <button
+                            onClick={() => setShowVoiceChat(true)}
+                            className="p-2 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition"
+                            title="Entrar com voz"
+                            aria-label="Entrar com voz"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 1v11" />
+                                <path d="M19 11a7 7 0 01-14 0" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </header>
@@ -390,6 +406,11 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
                 onConfirm={handleConfirmSwitch}
                 currentEditor={editorType}
             />
+
+            {/* Voice Chat PoC */}
+            {showVoiceChat && (
+                <VoiceChat documentId={documentId} onClose={() => setShowVoiceChat(false)} />
+            )}
         </div>
     );
 }

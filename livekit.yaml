@@ -1,0 +1,30 @@
+port: 7880
+
+rtc:
+  port_range_start: 50000
+  port_range_end: 60000
+  # Como seu host tem IP público, isso costuma resolver bem
+  use_external_ip: true
+  tcp_port: 7881
+
+redis:
+  address: redis:6379
+
+# Chave/secret da API do LiveKit (obrigatório)
+keys:
+  lk_a9f8b7c6d5e4: "qW8v9sK2zP4rT1yU6hJ3nV0bM5cQ7eL9gH2fS4dA6kL8pG0xZ"
+
+# TURN servers (obrigatório para redes restritivas)
+turn:
+  enabled: true
+  # URLs do TURN (seu TURN está no mesmo host IP do LiveKit)
+  # Recomendo manter UDP + TCP.
+  urls:
+    - "turn:45.162.145.14:3478?transport=udp"
+    - "turn:45.162.145.14:3478?transport=tcp"
+    # Se habilitar TLS no coturn e tiver cert:
+    # - "turns:45.162.145.14:5349?transport=tcp"
+
+  # Credenciais (tem que bater com as do coturn)
+  username: "turnuser"
+  password: "turnpassforte"
