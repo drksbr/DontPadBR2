@@ -71,9 +71,12 @@ export async function GET(
         // Ler o mapa de segurança
         const securityMap = ydoc.getMap("security");
         const protectedValue = securityMap.get("protected");
-        isProtected = protectedValue === true; // Verifica se é exatamente true
-        const hasPasswordHash = !!securityMap.get("passwordHash");
         const passwordHash = securityMap.get("passwordHash") as string | null;
+        const hasPasswordHash = !!passwordHash;
+        
+        // A proteção é considerada ativa se há um hash de senha
+        // (O campo "protected" pode ter problemas de sincronização, então usamos o hash como indicador)
+        isProtected = hasPasswordHash;
 
         console.log(`[Security] Documento ${sanitizedId}:`, {
           isProtected,
