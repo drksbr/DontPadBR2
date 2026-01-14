@@ -1,8 +1,8 @@
 /**
  * Utilitários de criptografia para o DontPad
  *
- * IMPORTANTE: Usa APENAS crypto.subtle SHA-256 para garantir consistência
- * entre ambientes de desenvolvimento e produção. Não há fallback.
+ * IMPORTANTE: Usa SHA-256 com suporte a browser (crypto.subtle) e servidor Node.js (crypto.createHash)
+ * Garantindo consistência entre ambientes de desenvolvimento e produção.
  */
 
 // Versão do frontend
@@ -10,26 +10,31 @@ export const APP_VERSION = "V0.1.1";
 
 /**
  * Gera um hash SHA-256 do PIN fornecido.
- * Usa crypto.subtle para garantir consistência entre dev e produção.
+ * Funciona em browser (crypto.subtle) e servidor Node.js (crypto.createHash)
  *
  * @param pin - O PIN a ser hasheado
  * @returns Promise com o hash em formato hexadecimal
- * @throws Error se crypto.subtle não estiver disponível
  */
 export async function hashPin(pin: string): Promise<string> {
-  // crypto.subtle é obrigatório para garantir consistência
-  if (typeof crypto === "undefined" || !crypto.subtle) {
-    throw new Error(
-      "Ambiente inseguro: crypto.subtle não disponível. " +
-        "A proteção por PIN requer HTTPS em produção ou localhost em desenvolvimento."
-    );
+  // Ambiente do browser com crypto.subtle
+  if (typeof crypto !== "undefined" && crypto.subtle) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(pin);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
-  const encoder = new TextEncoder();
-  const data = encoder.encode(pin);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  // Ambiente do servidor Node.js
+  if (typeof require !== "undefined") {
+    // Dynamic import para evitar erro em environments sem Node.js
+    const crypto = require("crypto");
+    return crypto.createHash("sha256").update(pin).digest("hex");
+  }
+
+  throw new Error(
+    "Ambiente não suportado: Nem crypto.subtle (browser) nem Node.js crypto disponíveis."
+  );
 }
 
 /**
