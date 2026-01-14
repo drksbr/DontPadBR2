@@ -68,7 +68,9 @@ export async function GET(
 ): Promise<NextResponse<SecurityStatus | { error: string }>> {
   try {
     const { documentId } = await params;
+    console.log(`[Security] documentId RAW:`, documentId);
     const sanitizedId = sanitizeDocumentId(decodeURIComponent(documentId));
+    console.log(`[Security] sanitizedId DEPOIS de sanitizar:`, sanitizedId);
 
     // Verificar se já tem acesso via JWT
     console.log(`[Security] Verificando acesso para documento: ${sanitizedId}`);
