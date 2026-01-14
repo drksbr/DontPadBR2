@@ -26,14 +26,15 @@ export function VoiceChat({ documentId, onClose }: { documentId: string; onClose
             if (!data.token) throw new Error(data.error || "no token returned");
 
             const livekit = await import("livekit-client");
-            const room = await livekit.connect(data.url, data.token, { autoSubscribe: true });
+            const room = new livekit.Room();
+            await room.connect(data.url, data.token, { autoSubscribe: true });
             roomRef.current = room;
             setConnected(true);
 
             // Participants
             const updateList = () => {
                 try {
-                    const list = Array.from(room.participants.values()).map((p: any) => p.identity || p.sid || "anonymous");
+                    const list = Array.from(room.remoteParticipants.values()).map((p: any) => p.identity || p.sid || "anonymous");
                     setParticipants(list);
                 } catch (e) {
                     setParticipants([]);
@@ -53,7 +54,7 @@ export function VoiceChat({ documentId, onClose }: { documentId: string; onClose
             const { createLocalAudioTrack } = await import("livekit-client");
             const track = await createLocalAudioTrack();
             await room.localParticipant.publishTrack(track);
-            track.setEnabled(!muted);
+            (track as any).setEnabled?.(!muted);
         } catch (e: any) {
             console.error("Voice join error", e);
             alert(e?.message || String(e));

@@ -105,7 +105,7 @@
 }
 
 a {
-  @apply text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 transition underline decoration-slate-300 dark:decoration-slate-600 underline-offset-4 hover:decoration-slate-900 dark:hover:decoration-slate-100;
+  @apply text-slate-900 dark:text-slate-100 hover:text-slate-700 dark:hover:text-slate-300 transition decoration-slate-300 dark:decoration-slate-600 underline-offset-4 hover:decoration-slate-900 dark:hover:decoration-slate-100;
 }
 
 a[target="_blank"]::after {

@@ -7,20 +7,18 @@
     "y-sweet": "npx y-sweet serve ./data"
   },
   "dependencies": {
-    "@blocknote/core": "^0.44.2",
-    "@blocknote/mantine": "^0.44.2",
-    "@blocknote/react": "^0.44.2",
     "@y-sweet/react": "^0.9.1",
     "@y-sweet/sdk": "^0.9.1",
-    "codemirror": "5",
     "livekit-client": "^2.16.1",
     "livekit-server-sdk": "^2.15.0",
     "next": "^16.0.10",
-    "y-codemirror": "^3.0.1",
+    "quill": "^2.0.3",
+    "quill-cursors": "^4.0.3",
+    "y-quill": "^1.0.0",
     "yjs": "^13.6.20"
   },
   "devDependencies": {
-    "@types/codemirror": "^5.60.17",
+    "@types/quill": "^2.0.14",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.20",
