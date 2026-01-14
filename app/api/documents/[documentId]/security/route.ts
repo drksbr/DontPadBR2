@@ -4,8 +4,8 @@ import { sanitizeDocumentId } from "@/lib/colors";
 import { hasDocumentAccess } from "@/lib/jwt";
 import * as Y from "yjs";
 
-const connectionString = process.env.CONNECTION_STRING || "ys://127.0.0.1:8080";
-const fallbackConnectionString = "ys://127.0.0.1:8080";
+const connectionString = process.env.CONNECTION_STRING || "ys://127.0.0.1:4001";
+const fallbackConnectionString = "ys://127.0.0.1:4001";
 
 interface SecurityStatus {
   isProtected: boolean;

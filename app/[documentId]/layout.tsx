@@ -4,7 +4,7 @@ import { SecureDocumentProvider } from "@/components/SecureDocumentProvider";
 import type { ClientToken } from "@y-sweet/sdk";
 
 const manager = new DocumentManager(
-    process.env.CONNECTION_STRING || "ys://127.0.0.1:8080",
+    process.env.CONNECTION_STRING || "ys://127.0.0.1:4001",
 );
 
 interface DocumentLayoutProps {
@@ -49,7 +49,7 @@ export default async function DocumentLayout({
             // it's pointing to the internal docker host (ys://ysweet:8080) but the
             // developer is running locally without Docker, suggest using localhost.
             const conn = process.env.CONNECTION_STRING;
-            const suggestion = conn && conn.includes("ysweet") ? "Try setting CONNECTION_STRING=ys://127.0.0.1:8080 when running locally, or start the Y-Sweet server." : "Ensure your CONNECTION_STRING points to a running Y-Sweet instance and that it is reachable from this server.";
+            const suggestion = conn && conn.includes("ysweet") ? "Try setting CONNECTION_STRING=ys://127.0.0.1:4001 when running locally, or start the Y-Sweet server." : "Ensure your CONNECTION_STRING points to a running Y-Sweet instance and that it is reachable from this server.";
             console.error("Failed to get client token from Y-Sweet", err);
 
             // Try a TCP probe to provide a clearer diagnostic when possible
@@ -83,9 +83,9 @@ export default async function DocumentLayout({
             // fallback automatically before giving up.
             try {
                 if (conn && conn.includes("ysweet")) {
-                    console.debug("Attempting fallback to ys://127.0.0.1:8080");
+                    console.debug("Attempting fallback to ys://127.0.0.1:4001");
                     const { DocumentManager } = await import("@y-sweet/sdk");
-                    const fallbackManager = new DocumentManager("ys://127.0.0.1:8080");
+                    const fallbackManager = new DocumentManager("ys://127.0.0.1:4001");
                     const token = await fallbackManager.getOrCreateDocAndToken(sanitizedId);
                     return fixWebSocketUrl(token);
                 }

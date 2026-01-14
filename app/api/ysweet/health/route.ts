@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const conn = process.env.CONNECTION_STRING || "ys://127.0.0.1:8080";
+  const conn = process.env.CONNECTION_STRING || "ys://127.0.0.1:4001";
 
   // Try to parse ys://host:port
   try {
