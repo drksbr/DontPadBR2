@@ -26,21 +26,32 @@ async function getDocUpdate(docId: string): Promise<Uint8Array | null> {
 
   try {
     const manager = new DocumentManager(connectionString);
-    console.debug(
+    console.log(
       `[VerifyPIN] Tentando carregar documento: ${fullDocId} de ${connectionString}`
     );
-    return await manager.getDocAsUpdate(fullDocId);
+    const update = await manager.getDocAsUpdate(fullDocId);
+    console.log(`[VerifyPIN] Documento carregado com sucesso, bytes: ${update?.byteLength}`);
+    return update;
   } catch (error) {
+    console.log(
+      `[VerifyPIN] Erro ao carregar de ${connectionString}:`,
+      error instanceof Error ? error.message : String(error)
+    );
     if (connectionString !== fallbackConnectionString) {
-      console.debug("[VerifyPIN] Primary connection failed, trying fallback");
+      console.log("[VerifyPIN] Primary connection failed, trying fallback");
       try {
         const fallbackManager = new DocumentManager(fallbackConnectionString);
-        console.debug(
+        console.log(
           `[VerifyPIN] Tentando fallback: ${fullDocId} de ${fallbackConnectionString}`
         );
-        return await fallbackManager.getDocAsUpdate(fullDocId);
-      } catch {
-        // fallback also failed
+        const update = await fallbackManager.getDocAsUpdate(fullDocId);
+        console.log(`[VerifyPIN] Documento carregado do fallback, bytes: ${update?.byteLength}`);
+        return update;
+      } catch (fallbackError) {
+        console.log(
+          "[VerifyPIN] Fallback also failed:",
+          fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+        );
       }
     }
     return null;
