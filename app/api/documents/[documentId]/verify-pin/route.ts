@@ -75,11 +75,14 @@ export async function POST(
         Y.applyUpdate(ydoc, update);
 
         const securityMap = ydoc.getMap("security");
-        const isProtected = securityMap.get("protected");
+        const protectedValue = securityMap.get("protected");
+        const isProtected = protectedValue === true;
         storedHash = securityMap.get("passwordHash") as string | null;
 
         console.log(`[VerifyPIN] Mapa de segurança:`, {
           isProtected,
+          protectedValue,
+          protectedType: typeof protectedValue,
           hasPasswordHash: !!storedHash,
           passwordHashLength: storedHash ? storedHash.length : 0,
           mapSize: securityMap.size,
