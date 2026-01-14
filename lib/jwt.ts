@@ -47,8 +47,15 @@ export async function verifyDocumentToken(
  * Define o cookie de autenticação para um documento
  */
 export async function setDocumentAuthCookie(documentId: string): Promise<void> {
+  console.log(`[JWT] Gerando token para documento: ${documentId}`);
   const token = await generateDocumentToken(documentId);
   const cookieStore = await cookies();
+
+  console.log(`[JWT] Definindo cookie de autenticação para: ${documentId}`, {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+  });
 
   cookieStore.set(`${COOKIE_NAME}_${documentId}`, token, {
     httpOnly: true,
@@ -67,15 +74,20 @@ export async function hasDocumentAccess(documentId: string): Promise<boolean> {
   const token = cookieStore.get(`${COOKIE_NAME}_${documentId}`)?.value;
 
   if (!token) {
+    console.log(`[JWT] Nenhum token encontrado para documento: ${documentId}`);
     return false;
   }
 
+  console.log(`[JWT] Token encontrado para ${documentId}, verificando...`);
   const payload = await verifyDocumentToken(token);
   if (!payload) {
+    console.warn(`[JWT] Token inválido para documento: ${documentId}`);
     return false;
   }
 
-  return payload.documentId === documentId;
+  const isValid = payload.documentId === documentId;
+  console.log(`[JWT] Acesso verificado para ${documentId}: ${isValid}`);
+  return isValid;
 }
 
 /**

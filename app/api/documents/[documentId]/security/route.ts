@@ -54,6 +54,7 @@ export async function GET(
     const sanitizedId = sanitizeDocumentId(decodeURIComponent(documentId));
 
     // Verificar se já tem acesso via JWT
+    console.log(`[Security] Verificando acesso para documento: ${sanitizedId}`);
     const hasAccess = await hasDocumentAccess(sanitizedId);
 
     // Tentar ler os metadados de segurança do Y-Sweet
@@ -70,26 +71,41 @@ export async function GET(
         // Ler o mapa de segurança
         const securityMap = ydoc.getMap("security");
         isProtected = securityMap.get("protected") === true;
+        const hasPasswordHash = !!securityMap.get("passwordHash");
 
-        // Debug log
-        console.debug("[Security API] Document:", sanitizedId, {
+        console.log(`[Security] Documento ${sanitizedId}:`, {
           isProtected,
-          hasPasswordHash: !!securityMap.get("passwordHash"),
+          hasPasswordHash,
+          hasAccess,
           mapSize: securityMap.size,
         });
 
         ydoc.destroy();
+      } else {
+        console.warn(
+          `[Security] Documento ${sanitizedId} não encontrado ou vazio`
+        );
       }
     } catch (error) {
       // Se não conseguir ler, assume que não está protegido
-      console.debug("Could not read security metadata:", error);
+      console.error(
+        `[Security] Erro ao ler metadados de ${sanitizedId}:`,
+        error
+      );
       isProtected = false;
     }
 
-    return NextResponse.json({
+    const finalResponse = {
       isProtected,
       hasAccess: hasAccess || !isProtected, // Se não está protegido, tem acesso
-    });
+    };
+
+    console.log(
+      `[Security] Resposta final para ${sanitizedId}:`,
+      finalResponse
+    );
+
+    return NextResponse.json(finalResponse);
   } catch (error) {
     console.error("Error checking security status:", error);
     return NextResponse.json(

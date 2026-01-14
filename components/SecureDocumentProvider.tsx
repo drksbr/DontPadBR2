@@ -34,16 +34,19 @@ export function SecureDocumentProvider({
     // Verificar status de segurança
     const checkSecurity = useCallback(async () => {
         try {
+            console.log(`[SecureDocumentProvider] Verificando segurança do documento: ${documentId}`);
             const response = await fetch(`/api/documents/${encodeURIComponent(documentId)}/security`);
             if (response.ok) {
                 const data: SecurityStatus = await response.json();
+                console.log(`[SecureDocumentProvider] Status recebido:`, data);
                 setStatus(data);
             } else {
                 // Se falhar, assume não protegido
+                console.warn(`[SecureDocumentProvider] Falha ao verificar segurança, status: ${response.status}`);
                 setStatus({ isProtected: false, hasAccess: true });
             }
         } catch (err) {
-            console.error("Failed to check security:", err);
+            console.error("[SecureDocumentProvider] Erro ao verificar segurança:", err);
             setStatus({ isProtected: false, hasAccess: true });
         } finally {
             setIsLoading(false);

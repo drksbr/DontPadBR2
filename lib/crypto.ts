@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
  */
 
 // Versão do frontend
-export const APP_VERSION = "V0.1.1";
+export const APP_VERSION = "V0.1.2";
 
 // Constante de log para debug
 const DEBUG =
