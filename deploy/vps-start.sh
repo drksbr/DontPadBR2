@@ -37,7 +37,15 @@ fi
 
 # Iniciar Next.js na porta 4000
 echo "Iniciando Next.js..."
-PORT=4000 pm2 start bun --name "nextjs" -- run start
+if [ -f ".next/standalone/server.js" ]; then
+    # Usar standalone se já foi feito build
+    PORT=4000 pm2 start bun --name "nextjs" -- .next/standalone/server.js
+else
+    # Fazer build primeiro
+    echo "Build não encontrado. Fazendo build..."
+    bun run build
+    PORT=4000 pm2 start bun --name "nextjs" -- .next/standalone/server.js
+fi
 
 # Salvar
 pm2 save
