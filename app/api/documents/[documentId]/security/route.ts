@@ -72,6 +72,12 @@ export async function GET(
     try {
       const update = await getDocUpdate(sanitizedId);
 
+      console.log(`[Security] Update recebido:`, {
+        existe: !!update,
+        byteLength: update?.byteLength,
+        tipo: update ? "Uint8Array" : "null",
+      });
+
       if (update && update.byteLength > 0) {
         // Decodificar o documento Yjs
         const ydoc = new Y.Doc();
@@ -79,23 +85,36 @@ export async function GET(
 
         // Ler o mapa de segurança
         const securityMap = ydoc.getMap("security");
+
+        const mapKeys = Array.from(securityMap.keys());
+        console.log(`[Security] securityMap.keys():`, mapKeys);
+        console.log(`[Security] securityMap.size:`, securityMap.size);
+
+        // Log cada chave e valor individualmente
+        mapKeys.forEach((key) => {
+          const value = securityMap.get(key);
+          console.log(`[Security] securityMap['${key}']:`, {
+            value,
+            tipo: typeof value,
+            isString: typeof value === "string",
+            comprimento: typeof value === "string" ? value.length : undefined,
+          });
+        });
+
         const protectedValue = securityMap.get("protected");
         const passwordHash = securityMap.get("passwordHash") as string | null;
         const hasPasswordHash = !!passwordHash;
 
         // A proteção é considerada ativa se há um hash de senha
-        // (O campo "protected" pode ter problemas de sincronização, então usamos o hash como indicador)
         isProtected = hasPasswordHash;
 
         console.log(`[Security] Documento ${sanitizedId}:`, {
           isProtected,
-          protectedValue, // Log do valor bruto
+          protectedValue,
           protectedType: typeof protectedValue,
           hasPasswordHash,
           passwordHashLength: passwordHash ? passwordHash.length : 0,
           hasAccess,
-          mapSize: securityMap.size,
-          mapKeys: Array.from(securityMap.keys()),
         });
 
         ydoc.destroy();
@@ -113,14 +132,30 @@ export async function GET(
       isProtected = false;
     }
 
+    // Lógica correcta:
+    // - isProtected = true se tem PIN (passwordHash existe)
+    // - hasAccess = true APENAS se tem JWT válido OU documento não está protegido
+    let finalHasAccess = false;
+    if (!isProtected) {
+      // Documento não protegido - acesso livre
+      finalHasAccess = true;
+    } else if (hasAccess) {
+      // Documento protegido E tem JWT válido
+      finalHasAccess = true;
+    } else {
+      // Documento protegido e sem JWT - sem acesso (vai pedir PIN)
+      finalHasAccess = false;
+    }
+
     const finalResponse = {
       isProtected,
-      hasAccess: hasAccess || !isProtected, // Se não está protegido, tem acesso
+      hasAccess: finalHasAccess,
     };
 
     console.log(
       `[Security] Resposta final para ${sanitizedId}:`,
-      finalResponse
+      finalResponse,
+      `(isProtected=${isProtected}, hasJWT=${hasAccess})`
     );
 
     return NextResponse.json(finalResponse);
