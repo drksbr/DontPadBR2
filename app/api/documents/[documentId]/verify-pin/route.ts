@@ -21,16 +21,15 @@ interface VerifyPinResponse {
  * Tenta obter o documento do Y-Sweet, com fallback para localhost
  */
 async function getDocUpdate(docId: string): Promise<Uint8Array | null> {
-  // Y-Sweet adiciona prefixo "doc_" aos IDs
-  const fullDocId = `doc_${docId}`;
-
   try {
     const manager = new DocumentManager(connectionString);
     console.log(
-      `[VerifyPIN] Tentando carregar documento: ${fullDocId} de ${connectionString}`
+      `[VerifyPIN] Tentando carregar documento: ${docId} de ${connectionString}`
     );
-    const update = await manager.getDocAsUpdate(fullDocId);
-    console.log(`[VerifyPIN] Documento carregado com sucesso, bytes: ${update?.byteLength}`);
+    const update = await manager.getDocAsUpdate(docId);
+    console.log(
+      `[VerifyPIN] Documento carregado com sucesso, bytes: ${update?.byteLength}`
+    );
     return update;
   } catch (error) {
     console.log(
@@ -42,15 +41,19 @@ async function getDocUpdate(docId: string): Promise<Uint8Array | null> {
       try {
         const fallbackManager = new DocumentManager(fallbackConnectionString);
         console.log(
-          `[VerifyPIN] Tentando fallback: ${fullDocId} de ${fallbackConnectionString}`
+          `[VerifyPIN] Tentando fallback: ${docId} de ${fallbackConnectionString}`
         );
-        const update = await fallbackManager.getDocAsUpdate(fullDocId);
-        console.log(`[VerifyPIN] Documento carregado do fallback, bytes: ${update?.byteLength}`);
+        const update = await fallbackManager.getDocAsUpdate(docId);
+        console.log(
+          `[VerifyPIN] Documento carregado do fallback, bytes: ${update?.byteLength}`
+        );
         return update;
       } catch (fallbackError) {
         console.log(
           "[VerifyPIN] Fallback also failed:",
-          fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError)
         );
       }
     }

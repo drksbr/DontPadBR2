@@ -16,38 +16,41 @@ interface SecurityStatus {
  * Tenta obter o documento do Y-Sweet, com fallback para localhost
  */
 async function getDocUpdate(docId: string): Promise<Uint8Array | null> {
-  // Y-Sweet adiciona prefixo "doc_" aos IDs
-  const fullDocId = `doc_${docId}`;
-
   // Tentar com a connection string configurada
   try {
     const manager = new DocumentManager(connectionString);
     console.log(
-      `[Security] Tentando carregar documento: ${fullDocId} de ${connectionString}`
+      `[Security] Tentando carregar documento: ${docId} de ${connectionString}`
     );
-    const update = await manager.getDocAsUpdate(fullDocId);
-    console.log(`[Security] Documento carregado com sucesso, bytes: ${update?.byteLength}`);
+    const update = await manager.getDocAsUpdate(docId);
+    console.log(
+      `[Security] Documento carregado com sucesso, bytes: ${update?.byteLength}`
+    );
     return update;
   } catch (error) {
     console.log(
       `[Security] Erro ao carregar de ${connectionString}:`,
       error instanceof Error ? error.message : String(error)
     );
-    
+
     // Se falhar e o host for diferente de localhost, tentar localhost
     if (connectionString !== fallbackConnectionString) {
       console.log(
-        `[Security] Tentando fallback: ${fullDocId} de ${fallbackConnectionString}`
+        `[Security] Tentando fallback: ${docId} de ${fallbackConnectionString}`
       );
       try {
         const fallbackManager = new DocumentManager(fallbackConnectionString);
-        const update = await fallbackManager.getDocAsUpdate(fullDocId);
-        console.log(`[Security] Documento carregado do fallback, bytes: ${update?.byteLength}`);
+        const update = await fallbackManager.getDocAsUpdate(docId);
+        console.log(
+          `[Security] Documento carregado do fallback, bytes: ${update?.byteLength}`
+        );
         return update;
       } catch (fallbackError) {
         console.log(
           "[Security] Fallback also failed:",
-          fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError)
         );
       }
     }
