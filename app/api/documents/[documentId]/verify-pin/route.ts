@@ -21,15 +21,24 @@ interface VerifyPinResponse {
  * Tenta obter o documento do Y-Sweet, com fallback para localhost
  */
 async function getDocUpdate(docId: string): Promise<Uint8Array | null> {
+  // Y-Sweet adiciona prefixo "doc_" aos IDs
+  const fullDocId = `doc_${docId}`;
+
   try {
     const manager = new DocumentManager(connectionString);
-    return await manager.getDocAsUpdate(docId);
+    console.debug(
+      `[VerifyPIN] Tentando carregar documento: ${fullDocId} de ${connectionString}`
+    );
+    return await manager.getDocAsUpdate(fullDocId);
   } catch (error) {
     if (connectionString !== fallbackConnectionString) {
       console.debug("[VerifyPIN] Primary connection failed, trying fallback");
       try {
         const fallbackManager = new DocumentManager(fallbackConnectionString);
-        return await fallbackManager.getDocAsUpdate(docId);
+        console.debug(
+          `[VerifyPIN] Tentando fallback: ${fullDocId} de ${fallbackConnectionString}`
+        );
+        return await fallbackManager.getDocAsUpdate(fullDocId);
       } catch {
         // fallback also failed
       }

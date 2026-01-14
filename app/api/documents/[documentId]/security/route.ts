@@ -16,10 +16,16 @@ interface SecurityStatus {
  * Tenta obter o documento do Y-Sweet, com fallback para localhost
  */
 async function getDocUpdate(docId: string): Promise<Uint8Array | null> {
+  // Y-Sweet adiciona prefixo "doc_" aos IDs
+  const fullDocId = `doc_${docId}`;
+
   // Tentar com a connection string configurada
   try {
     const manager = new DocumentManager(connectionString);
-    return await manager.getDocAsUpdate(docId);
+    console.debug(
+      `[Security] Tentando carregar documento: ${fullDocId} de ${connectionString}`
+    );
+    return await manager.getDocAsUpdate(fullDocId);
   } catch (error) {
     // Se falhar e o host for diferente de localhost, tentar localhost
     if (connectionString !== fallbackConnectionString) {
@@ -29,7 +35,10 @@ async function getDocUpdate(docId: string): Promise<Uint8Array | null> {
       );
       try {
         const fallbackManager = new DocumentManager(fallbackConnectionString);
-        return await fallbackManager.getDocAsUpdate(docId);
+        console.debug(
+          `[Security] Tentando fallback: ${fullDocId} de ${fallbackConnectionString}`
+        );
+        return await fallbackManager.getDocAsUpdate(fullDocId);
       } catch (fallbackError) {
         console.debug(
           "[Security] Fallback also failed:",
