@@ -75,7 +75,16 @@ export async function POST(
         Y.applyUpdate(ydoc, update);
 
         const securityMap = ydoc.getMap("security");
+        const isProtected = securityMap.get("protected");
         storedHash = securityMap.get("passwordHash") as string | null;
+
+        console.log(`[VerifyPIN] Mapa de segurança:`, {
+          isProtected,
+          hasPasswordHash: !!storedHash,
+          passwordHashLength: storedHash ? storedHash.length : 0,
+          mapSize: securityMap.size,
+          mapKeys: Array.from(securityMap.keys()),
+        });
 
         console.log(
           `[VerifyPIN] Hash armazenado encontrado: ${
@@ -85,7 +94,9 @@ export async function POST(
 
         ydoc.destroy();
       } else {
-        console.warn("[VerifyPIN] Documento não encontrado no Y-Sweet");
+        console.warn(
+          `[VerifyPIN] Documento não encontrado no Y-Sweet. Update byteLength: ${update?.byteLength}`
+        );
       }
     } catch (error) {
       console.error("[VerifyPIN] Erro ao ler dados de segurança:", error);

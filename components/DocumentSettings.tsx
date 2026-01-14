@@ -351,7 +351,11 @@ export function DocumentSettings({ documentId, subdocumentName, isOpen, onClose 
             securityMap.set("passwordHash", pinHash);
             securityMap.set("createdAt", new Date().toISOString());
 
-            console.log("[DocumentSettings] PIN salvo com sucesso!");
+            console.log("[DocumentSettings] PIN salvo com sucesso! Aguardando sincronização...");
+
+            // Aguardar um pouco para garantir sincronização com Y-Sweet
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             setIsProtected(true);
             setPin("");
             setConfirmPin("");

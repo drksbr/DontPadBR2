@@ -72,18 +72,21 @@ export async function GET(
         const securityMap = ydoc.getMap("security");
         isProtected = securityMap.get("protected") === true;
         const hasPasswordHash = !!securityMap.get("passwordHash");
+        const passwordHash = securityMap.get("passwordHash") as string | null;
 
         console.log(`[Security] Documento ${sanitizedId}:`, {
           isProtected,
           hasPasswordHash,
+          passwordHashLength: passwordHash ? passwordHash.length : 0,
           hasAccess,
           mapSize: securityMap.size,
+          mapKeys: Array.from(securityMap.keys()),
         });
 
         ydoc.destroy();
       } else {
         console.warn(
-          `[Security] Documento ${sanitizedId} não encontrado ou vazio`
+          `[Security] Documento ${sanitizedId} não encontrado ou vazio. Update byteLength: ${update?.byteLength}`
         );
       }
     } catch (error) {
