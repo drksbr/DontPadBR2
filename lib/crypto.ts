@@ -5,6 +5,9 @@
  * entre ambientes de desenvolvimento e produção. Não há fallback.
  */
 
+// Versão do frontend
+export const APP_VERSION = "V0.1.1";
+
 /**
  * Gera um hash SHA-256 do PIN fornecido.
  * Usa crypto.subtle para garantir consistência entre dev e produção.

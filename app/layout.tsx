@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { VersionLogger } from "@/components/VersionLogger";
 
 import "./globals.css";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={inter.className} data-scroll-behavior="smooth">
       <body className="bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 transition-colors">
+        <VersionLogger />
         {children}
       </body>
     </html>
