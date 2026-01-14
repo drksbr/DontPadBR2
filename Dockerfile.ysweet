@@ -1,10 +1,10 @@
 # Build stage for y-sweet server
-FROM rust:1.82-alpine AS y-sweet-builder
+FROM rust:1.83-alpine AS y-sweet-builder
 
 RUN apk add --no-cache musl-dev
 
 WORKDIR /build
-RUN cargo install y-sweet --version 0.9.1 --locked
+RUN cargo install y-sweet
 
 # Production stage
 FROM alpine:3.19
