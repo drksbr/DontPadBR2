@@ -73,7 +73,7 @@ export async function GET(
         const protectedValue = securityMap.get("protected");
         const passwordHash = securityMap.get("passwordHash") as string | null;
         const hasPasswordHash = !!passwordHash;
-        
+
         // A proteção é considerada ativa se há um hash de senha
         // (O campo "protected" pode ter problemas de sincronização, então usamos o hash como indicador)
         isProtected = hasPasswordHash;
