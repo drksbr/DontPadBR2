@@ -1,6 +1,6 @@
 import { DocumentManager } from "@y-sweet/sdk";
-import { YDocProvider } from "@y-sweet/react";
 import { sanitizeDocumentId } from "@/lib/colors";
+import { SecureDocumentProvider } from "@/components/SecureDocumentProvider";
 import type { ClientToken } from "@y-sweet/sdk";
 
 const manager = new DocumentManager(
@@ -103,8 +103,8 @@ export default async function DocumentLayout({
     }
 
     return (
-        <YDocProvider docId={sanitizedId} authEndpoint={getClientToken} showDebuggerLink={false} offlineSupport={true}>
+        <SecureDocumentProvider documentId={sanitizedId} authEndpoint={getClientToken}>
             {children}
-        </YDocProvider>
+        </SecureDocumentProvider>
     );
 }

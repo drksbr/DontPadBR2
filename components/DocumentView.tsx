@@ -5,11 +5,9 @@ import { Toast, useToast } from "./Toast";
 import { TextEditor } from "./TextEditor";
 import { FileManager } from "./FileManager";
 import { DocumentSettings } from "./DocumentSettings";
-import { PasswordProtection } from "./PasswordProtection";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SyncStatus } from "./SyncStatus";
-import { useMap } from "@y-sweet/react";
 import dynamic from 'next/dynamic';
 // const VoiceChat = dynamic(() => import('./VoiceChat').then(m => m.VoiceChat), { ssr: false });
 
@@ -23,44 +21,8 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
     const [showFiles, setShowFiles] = useState(false);
     const [showVoiceChat, setShowVoiceChat] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
-    const [isUnlocked, setIsUnlocked] = useState(true);
-    const [isCheckingPassword, setIsCheckingPassword] = useState(true);
-    const [passwordHash, setPasswordHash] = useState<string | null>(null);
     const { toast, showToast } = useToast();
     const [hideToast, setHideToast] = useState(false);
-    const securityMap = useMap("security");
-
-    // Check if document is protected using Y-Sweet
-    useEffect(() => {
-        if (!securityMap) {
-            // Y-Sweet not ready yet, wait
-            return;
-        }
-
-        try {
-            // Check session storage first for current session
-            const sessionKey = `doc_unlocked_${documentId}`;
-            const isSessionUnlocked = sessionStorage.getItem(sessionKey) === "true";
-
-            // Get protection settings from Y-Sweet security map
-            const isProtected = securityMap.get("protected") === true;
-            const hash = securityMap.get("passwordHash") || null;
-
-            setPasswordHash(hash as string | null);
-
-            if (isProtected && !isSessionUnlocked) {
-                setIsUnlocked(false);
-            } else {
-                setIsUnlocked(true);
-            }
-        } catch (error) {
-            console.error("Error checking document protection:", error);
-            setIsUnlocked(true);
-            setPasswordHash(null);
-        }
-
-        setIsCheckingPassword(false);
-    }, [securityMap, documentId]);
 
     const handleShowFiles = () => {
         setShowFiles(true);
@@ -81,31 +43,6 @@ export function DocumentView({ documentId, subdocumentName }: DocumentViewProps)
             showToast("Erro ao copiar link");
         }
     };
-
-    // Show password protection screen if needed
-    if (isCheckingPassword) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 dark:border-slate-100 mb-4"></div>
-                    <p className="text-slate-600 dark:text-slate-400">Carregando...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!isUnlocked && passwordHash) {
-        return (
-            <PasswordProtection
-                documentId={documentId}
-                passwordHash={passwordHash}
-                onUnlock={() => {
-                    setIsUnlocked(true);
-                    sessionStorage.setItem(`doc_unlocked_${documentId}`, "true");
-                }}
-            />
-        );
-    }
 
     return (
         <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100 transition-colors">

@@ -5,142 +5,106 @@ import { useYjsProvider, usePresence } from "@y-sweet/react";
 
 export function useSyncStatus() {
   const provider = useYjsProvider();
-  const presence = usePresence();
-
-  const [isConnected, setIsConnected] = useState<boolean>(() => {
-    try {
-      if (provider && typeof (provider as any).connected !== "undefined")
-        return Boolean((provider as any).connected);
-      if (presence && typeof (presence as any).entries === "function") {
-        try {
-          return Array.from((presence as any).entries()).length > 0;
-        } catch (e) {
-          /* ignore */
-        }
-      }
-      if (
-        provider &&
-        (provider as any).awareness &&
-        typeof (provider as any).awareness.getStates === "function"
-      )
-        return (provider as any).awareness.getStates().size > 0;
-      return false;
-    } catch (e) {
-      return false;
-    }
-  });
-
-  const [isSynced, setIsSynced] = useState<boolean>(() => {
-    try {
-      return Boolean(provider && ((provider as any).isSynced ?? true));
-    } catch (e) {
-      return true;
-    }
-  });
+  const [isConnected, setIsConnected] = useState(false);
+  const [isSynced, setIsSynced] = useState(false);
 
   useEffect(() => {
     if (!provider) return;
 
-    // Initial values (with fallbacks)
-    try {
-      if (typeof (provider as any).connected !== "undefined")
-        setIsConnected(Boolean((provider as any).connected));
-      else if (presence && typeof (presence as any).entries === "function") {
-        try {
-          setIsConnected(Array.from((presence as any).entries()).length > 0);
-        } catch (e) {}
-      } else if (
-        (provider as any).awareness &&
-        typeof (provider as any).awareness.getStates === "function"
-      )
-        setIsConnected((provider as any).awareness.getStates().size > 0);
-    } catch (e) {}
-
-    try {
-      setIsSynced(Boolean((provider as any).isSynced ?? true));
-    } catch (e) {}
-
-    // Debugging aid for flaky provider implementations (only in dev)
-    try {
-      if (process.env.NODE_ENV !== "production" && !isConnected) {
-        const presentCount =
-          presence && typeof (presence as any).entries === "function"
-            ? Array.from((presence as any).entries()).length
-            : undefined;
-        // eslint-disable-next-line no-console
-        console.debug("useSyncStatus debug", {
-          providerKeys: provider ? Object.keys(provider as any) : undefined,
-          hasIsSynced: typeof (provider as any).isSynced !== "undefined",
-          awarenessSize: (provider as any)?.awareness?.getStates?.()?.size,
-          presenceCount: presentCount,
-        });
+    // Check initial state
+    const checkState = () => {
+      const p = provider as any;
+      
+      // Check connection via awareness (most reliable)
+      let connected = false;
+      if (p.awareness?.getStates) {
+        const size = p.awareness.getStates().size;
+        connected = size > 0;
+      } else if (typeof p.connected === "boolean") {
+        connected = p.connected;
+      } else if (p.wsconnected === true) {
+        connected = true;
       }
-    } catch (e) {
-      // ignore
-    }
+      setIsConnected(connected);
+      
+      // Check sync state - multiple fallbacks
+      let synced = false;
+      if (typeof p.isSynced === "boolean") {
+        synced = p.isSynced;
+      } else if (typeof p.synced === "boolean") {
+        synced = p.synced;
+      } else if (p._synced === true) {
+        synced = true;
+      } else if (connected) {
+        // If connected but no sync property, assume synced after brief delay
+        synced = true;
+      }
+      setIsSynced(synced);
 
-    // Attach listeners if available
+      // Debug in dev
+      if (process.env.NODE_ENV !== "production") {
+        console.debug("[SyncStatus]", { connected, synced, providerKeys: Object.keys(p).slice(0, 10) });
+      }
+    };
+
+    // Initial check
+    checkState();
+
+    // Event handlers
     const onStatus = (payload: any) => {
-      // Some providers emit { status: 'connected' | 'disconnected' }
-      if (payload && payload.status) {
-        setIsConnected(payload.status === "connected");
+      if (typeof payload === "boolean") {
+        setIsConnected(payload);
+        if (payload) setIsSynced(true); // Connected implies synced for Y-Sweet
+      } else if (payload?.status) {
+        const connected = payload.status === "connected";
+        setIsConnected(connected);
+        if (connected) setIsSynced(true);
       }
-      // Some providers emit boolean
-      if (typeof payload === "boolean") setIsConnected(Boolean(payload));
     };
 
     const onSync = (synced: any) => {
-      // Some providers emit boolean directly or an object
-      if (typeof synced === "boolean") setIsSynced(synced);
-      else if (synced && typeof synced === "object") {
-        if ("isSynced" in synced)
-          setIsSynced(Boolean((synced as any).isSynced));
-        else if ("synced" in synced)
-          setIsSynced(Boolean((synced as any).synced));
+      if (typeof synced === "boolean") {
+        setIsSynced(synced);
+      } else if (synced?.isSynced !== undefined) {
+        setIsSynced(Boolean(synced.isSynced));
       }
     };
 
-    if (typeof (provider as any).on === "function") {
-      try {
-        (provider as any).on("status", onStatus);
-      } catch (e) {
-        // ignore
+    const onAwarenessChange = () => {
+      const p = provider as any;
+      if (p.awareness?.getStates) {
+        const connected = p.awareness.getStates().size > 0;
+        setIsConnected(connected);
+        if (connected) setIsSynced(true);
       }
-      try {
-        (provider as any).on("sync", onSync);
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    // Listen to awareness changes as a fallback for connection state
-    const awareness = (provider as any)?.awareness;
-    const awarenessHandler = () => {
-      try {
-        const size = awareness?.getStates?.().size ?? 0;
-        setIsConnected(size > 0);
-      } catch (e) {}
     };
 
-    if (awareness && typeof awareness.on === "function") {
-      try {
-        awareness.on("change", awarenessHandler);
-      } catch (e) {}
+    // Attach listeners
+    const p = provider as any;
+    
+    if (typeof p.on === "function") {
+      p.on("status", onStatus);
+      p.on("sync", onSync);
     }
+    
+    if (p.awareness?.on) {
+      p.awareness.on("change", onAwarenessChange);
+    }
+
+    // Poll check for initial connection (fallback)
+    const timeout = setTimeout(checkState, 500);
+    // Second check after a bit more time
+    const timeout2 = setTimeout(checkState, 1500);
 
     return () => {
-      if (typeof (provider as any).off === "function") {
-        try {
-          (provider as any).off("status", onStatus);
-        } catch (e) {}
-        try {
-          (provider as any).off("sync", onSync);
-        } catch (e) {}
+      clearTimeout(timeout);
+      clearTimeout(timeout2);
+      if (typeof p.off === "function") {
+        p.off("status", onStatus);
+        p.off("sync", onSync);
       }
-      if (awareness && typeof awareness.off === "function") {
-        try {
-          awareness.off("change", awarenessHandler);
-        } catch (e) {}
+      if (p.awareness?.off) {
+        p.awareness.off("change", onAwarenessChange);
       }
     };
   }, [provider]);

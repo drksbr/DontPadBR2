@@ -1,5 +1,4 @@
 import { Inter } from "next/font/google";
-import { LinkifyInit } from "@/components/LinkifyInit";
 
 import "./globals.css";
 
@@ -22,9 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={inter.className}>
+    <html lang="pt-BR" className={inter.className} data-scroll-behavior="smooth">
       <body className="bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 transition-colors">
-        <LinkifyInit />
         {children}
       </body>
     </html>
