@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { hashPin } from "@/lib/crypto";
+import { verifyPin } from "@/lib/crypto";
 
 interface PasswordProtectionProps {
     documentId: string;
@@ -25,17 +25,20 @@ export function PasswordProtection({
         setIsLoading(true);
 
         try {
-            const enteredHash = await hashPin(pin);
+            console.log(`[PasswordProtection] Verificando PIN de ${pin.length} caracteres`);
+            const isValid = await verifyPin(pin, passwordHash);
 
-            if (enteredHash === passwordHash) {
+            if (isValid) {
+                console.log("[PasswordProtection] PIN verificado com sucesso!");
                 sessionStorage.setItem(`doc_unlocked_${documentId}`, "true");
                 onUnlock();
             } else {
+                console.warn("[PasswordProtection] PIN incorreto");
                 setError("PIN incorreto");
                 setPin("");
             }
         } catch (err) {
-            console.error("Failed to verify PIN:", err);
+            console.error("[PasswordProtection] Erro ao verificar PIN:", err);
             setError("Erro ao verificar PIN");
         } finally {
             setIsLoading(false);

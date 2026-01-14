@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { DocumentManager } from "@y-sweet/sdk";
 import { sanitizeDocumentId } from "@/lib/colors";
 import { setDocumentAuthCookie } from "@/lib/jwt";
-import { hashPin } from "@/lib/crypto";
+import { hashPin, verifyPin } from "@/lib/crypto";
 import * as Y from "yjs";
 
 const connectionString = process.env.CONNECTION_STRING || "ys://127.0.0.1:4001";
@@ -55,11 +55,14 @@ export async function POST(
     const { pin } = body;
 
     if (!pin || typeof pin !== "string") {
+      console.warn("[VerifyPIN] PIN inválido fornecido");
       return NextResponse.json(
         { success: false, error: "PIN é obrigatório" },
         { status: 400 }
       );
     }
+
+    console.log(`[VerifyPIN] Verificando PIN para documento: ${sanitizedId}`);
 
     // Obter o hash do PIN armazenado no Y-Sweet
     let storedHash: string | null = null;
@@ -74,10 +77,18 @@ export async function POST(
         const securityMap = ydoc.getMap("security");
         storedHash = securityMap.get("passwordHash") as string | null;
 
+        console.log(
+          `[VerifyPIN] Hash armazenado encontrado: ${
+            storedHash ? storedHash.substring(0, 20) + "..." : "null"
+          }`
+        );
+
         ydoc.destroy();
+      } else {
+        console.warn("[VerifyPIN] Documento não encontrado no Y-Sweet");
       }
     } catch (error) {
-      console.error("Error reading security data:", error);
+      console.error("[VerifyPIN] Erro ao ler dados de segurança:", error);
       return NextResponse.json(
         { success: false, error: "Erro ao verificar PIN" },
         { status: 500 }
@@ -86,16 +97,19 @@ export async function POST(
 
     if (!storedHash) {
       // Documento não está protegido
+      console.warn("[VerifyPIN] Documento não tem hash de proteção");
       return NextResponse.json(
         { success: false, error: "Documento não está protegido" },
         { status: 400 }
       );
     }
 
-    // Verificar o PIN
-    const enteredHash = await hashPin(pin);
+    // Verificar o PIN usando bcrypt
+    console.log("[VerifyPIN] Comparando PIN com hash usando bcrypt");
+    const isValid = await verifyPin(pin, storedHash);
 
-    if (enteredHash !== storedHash) {
+    if (!isValid) {
+      console.warn("[VerifyPIN] PIN incorreto fornecido");
       return NextResponse.json(
         { success: false, error: "PIN incorreto" },
         { status: 401 }
@@ -103,11 +117,12 @@ export async function POST(
     }
 
     // PIN correto! Gerar JWT e salvar em cookie
+    console.log("[VerifyPIN] PIN verificado com sucesso! Gerando JWT");
     await setDocumentAuthCookie(sanitizedId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error verifying PIN:", error);
+    console.error("[VerifyPIN] Erro interno:", error);
     return NextResponse.json(
       { success: false, error: "Erro interno do servidor" },
       { status: 500 }

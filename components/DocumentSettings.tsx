@@ -343,18 +343,21 @@ export function DocumentSettings({ documentId, subdocumentName, isOpen, onClose 
         setIsLoading(true);
 
         try {
+            console.log("[DocumentSettings] Gerando hash para novo PIN");
             const pinHash = await hashPin(pin);
+            console.log("[DocumentSettings] Hash gerado, salvando no documento...");
 
             securityMap.set("protected", true);
             securityMap.set("passwordHash", pinHash);
             securityMap.set("createdAt", new Date().toISOString());
 
+            console.log("[DocumentSettings] PIN salvo com sucesso!");
             setIsProtected(true);
             setPin("");
             setConfirmPin("");
             showMessage("PIN configurado com sucesso! ✓", "success");
         } catch (error) {
-            console.error("Failed to save PIN:", error);
+            console.error("[DocumentSettings] Erro ao salvar PIN:", error);
             showMessage("Erro ao salvar PIN", "error");
         } finally {
             setIsLoading(false);
@@ -517,8 +520,8 @@ export function DocumentSettings({ documentId, subdocumentName, isOpen, onClose 
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 transition ${activeTab === tab.id
-                                        ? 'border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100'
-                                        : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                                    ? 'border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100'
+                                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                                     }`}
                             >
                                 {tab.icon}

@@ -61,6 +61,7 @@ export function SecureDocumentProvider({
         setIsVerifying(true);
 
         try {
+            console.log(`[SecureDocumentProvider] Enviando PIN para verificação do documento: ${documentId}`);
             const response = await fetch(`/api/documents/${encodeURIComponent(documentId)}/verify-pin`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -71,13 +72,15 @@ export function SecureDocumentProvider({
 
             if (data.success) {
                 // PIN correto! Recarregar status de segurança
+                console.log("[SecureDocumentProvider] PIN verificado com sucesso!");
                 await checkSecurity();
             } else {
+                console.warn("[SecureDocumentProvider] Erro na verificação:", data.error);
                 setError(data.error || "PIN incorreto");
                 setPin("");
             }
         } catch (err) {
-            console.error("Failed to verify PIN:", err);
+            console.error("[SecureDocumentProvider] Erro ao verificar PIN:", err);
             setError("Erro ao verificar PIN");
         } finally {
             setIsVerifying(false);
