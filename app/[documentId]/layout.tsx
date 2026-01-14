@@ -46,7 +46,7 @@ export default async function DocumentLayout({
             return fixWebSocketUrl(token);
         } catch (err: any) {
             // Attempt a simple fallback check: if the CONNECTION_STRING looks like
-            // it's pointing to the internal docker host (ys://ysweet:8080) but the
+            // it's pointing to the internal docker host (ys://ysweet:4001) but the
             // developer is running locally without Docker, suggest using localhost.
             const conn = process.env.CONNECTION_STRING;
             const suggestion = conn && conn.includes("ysweet") ? "Try setting CONNECTION_STRING=ys://127.0.0.1:4001 when running locally, or start the Y-Sweet server." : "Ensure your CONNECTION_STRING points to a running Y-Sweet instance and that it is reachable from this server.";

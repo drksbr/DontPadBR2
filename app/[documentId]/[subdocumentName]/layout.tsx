@@ -77,9 +77,9 @@ export default async function SubdocumentLayout({
 
             try {
                 if (conn && conn.includes("ysweet")) {
-                    console.debug("Attempting fallback to ys://127.0.0.1:8080");
+                    console.debug("Attempting fallback to ys://localhost:4001");
                     const { DocumentManager } = await import("@y-sweet/sdk");
-                    const fallbackManager = new DocumentManager("ys://127.0.0.1:8080");
+                    const fallbackManager = new DocumentManager("ys://localhost:4001");
                     const token = await fallbackManager.getOrCreateDocAndToken(docId);
                     return fixWebSocketUrl(token);
                 }
