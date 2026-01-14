@@ -244,6 +244,7 @@ export async function DELETE(
 
   try {
     const decodedDocumentId = decodeURIComponent(documentId);
+    let fileDeleted = false;
 
     // Delete physical file if fileName is provided
     if (fileName) {
@@ -255,14 +256,23 @@ export async function DELETE(
 
       try {
         await unlink(filePath);
-      } catch {
+        fileDeleted = true;
+        console.log(`File deleted successfully: ${filePath}`);
+      } catch (err) {
         // File might already be deleted, continue
-        console.warn(`File not found at ${filePath}`);
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        console.warn(`Could not delete file at ${filePath}: ${errorMsg}`);
       }
     }
 
     // Actual deletion from Y-Sweet Y.Array happens on client
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      fileDeleted: fileDeleted,
+      message: fileDeleted
+        ? "File deleted from filesystem and Y-Sweet"
+        : "File removed from Y-Sweet only",
+    });
   } catch (error) {
     console.error("Error deleting file:", error);
     return NextResponse.json(

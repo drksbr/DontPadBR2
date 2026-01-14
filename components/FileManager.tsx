@@ -314,11 +314,15 @@ export function FileManager({ documentId, subdocumentId }: FileManagerProps) {
 
             if (!response.ok) throw new Error('Falha ao deletar arquivo')
 
+            const result = await response.json();
+            console.log('Delete result:', result);
+
             // Remove from Y-Sweet array
             if (filesArray) {
                 const index = files.findIndex((f) => f.id === deleteModal.fileId)
                 if (index !== -1) {
                     filesArray.delete(index, 1)
+                    console.log(`File removed from Y-Sweet array at index ${index}`);
                 }
             }
 
@@ -327,6 +331,7 @@ export function FileManager({ documentId, subdocumentId }: FileManagerProps) {
             setError(
                 err instanceof Error ? err.message : 'Erro ao deletar arquivo'
             )
+            console.error('Delete error:', err);
         } finally {
             setIsDeleting(false)
         }
@@ -512,7 +517,7 @@ export function FileManager({ documentId, subdocumentId }: FileManagerProps) {
                                 </div>
                             </div>
                             <button
-                                onClick={() => handleDeleteFileClick(file.id, file.originalName)}
+                                onClick={() => handleDeleteFileClick(file.id, file.name)}
                                 className="ml-4 p-1 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                 title="Deletar arquivo"
                             >
