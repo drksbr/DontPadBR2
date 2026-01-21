@@ -71,7 +71,14 @@ export async function POST(
 ): Promise<NextResponse<VerifyPinResponse>> {
   try {
     const { documentId } = await params;
-    const sanitizedId = sanitizeDocumentId(decodeURIComponent(documentId));
+    let sanitizedId = sanitizeDocumentId(decodeURIComponent(documentId));
+    
+    // Remover prefixo doc_ se existir (às vezes vem assim do cliente)
+    if (sanitizedId.startsWith("doc_")) {
+      sanitizedId = sanitizedId.substring(4);
+    }
+
+    console.log(`[VerifyPIN] Documento ID final para buscar:`, sanitizedId);
 
     // Ler o PIN do body
     const body: VerifyPinRequest = await request.json();

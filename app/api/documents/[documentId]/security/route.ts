@@ -68,9 +68,14 @@ export async function GET(
 ): Promise<NextResponse<SecurityStatus | { error: string }>> {
   try {
     const { documentId } = await params;
-    console.log(`[Security] documentId RAW:`, documentId);
-    const sanitizedId = sanitizeDocumentId(decodeURIComponent(documentId));
-    console.log(`[Security] sanitizedId DEPOIS de sanitizar:`, sanitizedId);
+    let sanitizedId = sanitizeDocumentId(decodeURIComponent(documentId));
+    
+    // Remover prefixo doc_ se existir (às vezes vem assim do cliente)
+    if (sanitizedId.startsWith("doc_")) {
+      sanitizedId = sanitizedId.substring(4);
+    }
+    
+    console.log(`[Security] Documento ID final para buscar:`, sanitizedId);
 
     // Verificar se já tem acesso via JWT
     console.log(`[Security] Verificando acesso para documento: ${sanitizedId}`);
